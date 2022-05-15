@@ -1,0 +1,19 @@
+# Template file for 'neovide'
+pkgname=neovide
+version=0.13.2
+revision=1
+build_style=cargo
+hostmakedepends="fontconfig-devel freetype-devel libxkbcommon-devel curl"
+makedepends=python3
+depends="neovim libxkbcommon-x11 libglvnd"
+checkdepends="$depends"
+short_desc="No Nonsense Neovim Client in Rust"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license=MIT
+homepage=https://github.com/neovide/neovide
+distfiles="${homepage}/archive/refs/tags/${version}.tar.gz"
+checksum=3ae09d94ad6bbae9fdba306523b28071508c5e8eb205bc8fa9f32e7323fffdb6
+
+post_install() {
+	vlicense LICENSE
+}
