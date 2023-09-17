@@ -303,6 +303,9 @@ do_install() {
 	vmkdir usr/lib/chromium/locales
 	vcopy "out/Release/locales/*.pak" usr/lib/chromium/locales
 
+	vsed -i chrome/app/resources/manpage.1.in -E 's/@@MENUNAME@@/Chromium/g; s/@@PACKAGE@@/chromium/g; s/@@USR_BIN_SYMLINK_NAME@@/chromium/g'
+	vman chrome/app/resources/manpage.1.in chromium.1
+
 	vinstall ${FILESDIR}/chromium.desktop 644 usr/share/applications
 
 	vinstall out/Release/icudtl.dat 0644 usr/lib/chromium
