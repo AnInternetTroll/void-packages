@@ -1,0 +1,68 @@
+# Template file for 'dotnet-sdk'
+pkgname=dotnet-sdk
+version=8.0.1
+revision=1
+archs="x86_64"
+hostmakedepends="curl python3 clang cmake tar jq"
+makedepends="llvm15 mit-krb5-devel lttng-ust-devel icu-devel"
+short_desc=".NET is the free framework for building apps and powerful services"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT"
+homepage="https://dotnet.microsoft.com/en-us/"
+changelog="https://github.com/dotnet/dotnet/releases/"
+distfiles="https://github.com/dotnet/dotnet/archive/refs/tags/v${version}.tar.gz
+ https://github.com/dotnet/dotnet/releases/download/v${version}/release.json"
+checksum="df2d95fc3f00fea808bb238edf0d29d27b786307d63bdbf3787466b7f08d7963
+ b1743b0f9b13be66f1d73b296672b19cea7057721448c3326d8716dda9c343c1"
+skip_extraction="release.json"
+
+# Private stuff used throughout below
+_libbase="/usr/lib/dotnet"
+_binbase="/usr/bin/dotnet"
+_rid="x64"
+_releasepath="$XBPS_SRCDISTDIR/$pkgname-$version/release.json"
+
+pre_build() {
+	bash ./prep.sh
+}
+
+do_build() {
+	PATH="/usr/libexec/chroot-git:${PATH}"
+	DOTNET_CLI_TELEMETRY_OPTOUT=1
+	bash ./build.sh \
+		--clean-while-building \
+		--online \
+		--source-repository "$(jq -r .sourceRepository "${_releasepath}")" \
+		--source-version "$(jq -r .sourceVersion "${_releasepath}")"
+}
+
+do_install() {
+	mkdir -p "${DESTDIR}${_libbase}" || true
+	tar xvf "artifacts/${_rid}/Release/dotnet-sdk-$(jq -r .sdkVersion "${_releasepath}")-void-${_rid}.tar.gz" -C "${DESTDIR}${_libbase}"
+	mkdir -p "${DESTDIR}/usr/bin" || true
+	ln -s "$_libbase/dotnet" "$DESTDIR$_binbase" || true
+}
+
+post_install() {
+	vlicense "LICENSE.TXT"
+	vlicense "THIRD-PARTY-NOTICES.txt"
+}
+
+dotnet-runtime_package() {
+	short_desc+=" - runtime"
+	pkg_install() {
+		mkdir -p "${PKGDESTDIR}${_libbase}" || true
+		tar xvf "artifacts/${_rid}/Release/dotnet-runtime-${version}-void-${_rid}.tar.gz" -C "${PKGDESTDIR}${_libbase}"
+		mkdir -p "${PKGDESTDIR}/usr/bin" || true
+		ln -s "$_libbase/dotnet" "$PKGDESTDIR$_binbase" || true
+	}
+}
+
+aspnetcore-runtime_package() {
+	short_desc+=" - aspnetcore-runtime"
+	depends="dotnet-runtime>=${version}_${revision}"
+	pkg_install() {
+		mkdir -p "${PKGDESTDIR}${_libbase}" || true
+		tar xvf "artifacts/${_rid}/Release/aspnetcore-runtime-${version}-void-${_rid}.tar.gz" -C "${PKGDESTDIR}${_libbase}"
+	}
+}
