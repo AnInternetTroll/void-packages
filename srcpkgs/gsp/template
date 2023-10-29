@@ -1,0 +1,18 @@
+# Template file for 'gsp'
+pkgname=gsp
+version=1.0.1
+revision=1
+build_style=go
+short_desc="Better HTML syntax"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="0BSD"
+homepage="https://sr.ht/~mango/gsp/"
+go_import_path="git.thomasvoss.com/gsp"
+changelog="https://git.sr.ht/~mango/gsp/refs"
+distfiles="https://git.sr.ht/~mango/gsp/archive/v$version.tar.gz"
+checksum=97c6ef48f427c45693b2e2f0b14d17bdcb0f7cdd783ccb80fc3b10f38034e2d1
+
+post_install() {
+	vman gsp.1
+	vman gsp.5
+}

@@ -1,0 +1,16 @@
+# Template file for 'mkpass'
+pkgname=mkpass
+version=2.0.1
+revision=1
+short_desc="Simple password generator"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="0BSD"
+homepage="https://git.sr.ht/~mango/mkpass"
+changelog="https://git.sr.ht/~mango/mkpass/refs/"
+distfiles="https://git.sr.ht/~mango/mkpass/archive/v$version.tar.gz"
+checksum=78e190b30e0f1546649fe73b9e44c17680d856000bfb001128d01e951366c55b
+
+do_install() {
+	vbin mkpass
+	vman mkpass.1
+}

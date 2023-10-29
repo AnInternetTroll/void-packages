@@ -1,0 +1,6 @@
+#!/bin/sh
+exec 2>&1
+[ -r ./conf ] && . ./conf
+export ROCKET_PASTES=${ROCKET_PASTES:-/var/lib/paste/}
+
+exec chpst -u _paste:_paste paste-rs

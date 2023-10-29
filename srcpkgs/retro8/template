@@ -1,0 +1,12 @@
+pkgname=retro8
+version=0.1b
+revision=1
+build_style=cmake
+makedepends="SDL2-devel SDL2_image-devel"
+short_desc="PICO-8 implementation with SDL2/SDL1.2 and RetroArch back-ends"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-3.0-or-later"
+homepage="https://github.com/Jakz/retro8"
+distfiles="https://github.com/Jakz/retro8/archive/refs/tags/$version.tar.gz"
+checksum="2083d61403f56ae028451ce9d1f13e0f7b5ba601ecb15dadfd6c6dc39f392dfe"
+

@@ -1,0 +1,75 @@
+# vi: ft=sh
+# Template file for 'dotnet'
+pkgname=dotnet
+version=8.0.1
+revision=1
+archs="x86_64"
+#build_wrksrc=
+#build_style=
+#configure_args=""
+#make_build_args=""
+#make_install_args=""
+#conf_files=""
+#make_dirs="/var/log/dir 0755 root root"
+hostmakedepends="curl python3 clang cmake tar"
+makedepends="llvm15 mit-krb5-devel lttng-ust-devel icu-devel"
+#depends=""
+short_desc=".NET is the free framework for building apps and powerful services"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT"
+homepage="https://dotnet.microsoft.com/en-us/"
+#changelog=""
+distfiles="https://github.com/dotnet/dotnet/archive/refs/tags/v${version}.tar.gz"
+checksum=df2d95fc3f00fea808bb238edf0d29d27b786307d63bdbf3787466b7f08d7963
+
+# Private stuff used throughout below
+
+_sourcerepository="https://github.com/dotnet/dotnet"
+_sourceversion="4c51fbf526e6008802c3d0af51531e1592d9ebd0"
+_libbase="/usr/lib/dotnet"
+_unpackedfolder="build"
+_binpath="$DESTDIR/usr/bin/dotnet"
+
+pre_build() {
+	mkdir -p "$_unpackedfolder"
+	bash ./prep.sh
+}
+
+do_build() {
+	PATH="/usr/libexec/chroot-git:${PATH}"
+	DOTNET_CLI_TELEMETRY_OPTOUT=1
+	bash ./build.sh \
+		--clean-while-building \
+		--online \
+		--source-repository "$_sourcerepository" \
+		--source-version "$_sourceversion"
+}
+
+post_build() {
+	echo _binpath is $_binpath
+	echo _unpackedfolder is $_unpackedfolder
+	echo _libbase is $_libbase
+	echo DESTDIR is $DESTDIR
+	tar zxf artifacts/**/Release/dotnet-*.tar.gz -C "$_unpackedfolder"
+}
+
+do_install() {
+	echo _binpath is $_binpath
+	echo _unpackedfolder is $_unpackedfolder
+	echo _libbase is $_libbase
+	echo DESTDIR is $DESTDIR
+	vcopy "$_unpackedfolder" "$_libbase"
+	ln -s "$_libbase/dotnet" "$_binpath"
+}
+
+post_install() {
+	vlicense "LICENSE.TXT"
+}
+
+do_check() {
+	echo _binpath is $_binpath
+	echo _unpackedfolder is $_unpackedfolder
+	echo _libbase is $_libbase
+	echo DESTDIR is $DESTDIR
+	"$_binpath" --info
+}

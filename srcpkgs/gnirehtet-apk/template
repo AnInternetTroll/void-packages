@@ -1,0 +1,27 @@
+# Template file for 'gnirehtet-apk'
+pkgname=gnirehtet-apk
+version=2.5.1
+revision=1
+#archs="i686 x86_64"
+#build_wrksrc=
+# build_style=gnu-configure
+#configure_args=""
+#make_build_args=""
+#make_install_args=""
+#conf_files=""
+#make_dirs="/var/log/dir 0755 root root"
+hostmakedepends="gradle"
+makedepends=""
+depends=""
+short_desc=""
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-3.0-or-later"
+homepage=""
+#changelog=""
+distfiles="https://github.com/Genymobile/gnirehtet/archive/refs/tags/v${version}.tar.gz
+https://dl.google.com/android/repository/commandlinetools-linux-"$CMDLVER"_latest.zip"
+checksum=badbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadb
+
+do_build() {
+	gradle 
+}

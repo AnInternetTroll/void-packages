@@ -1,0 +1,15 @@
+# Template file for 'fastfetch'
+pkgname=fastfetch
+version=2.1.0
+revision=1
+build_style=cmake
+hostmakedepends=""
+makedepends=""
+# depends="pciutils vulkan-loader libX11 wayland glib dconf ImageMagick libchafa dbus-libs libOSMesa ocl-icd xfconf sqlite libnm libpulseaudio ddcutil"
+short_desc="Like neofetch, but much faster because written in C."
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT"
+homepage="https://github.com/fastfetch-cli/"
+changelog="https://github.com/fastfetch-cli/releases/"
+distfiles="https://github.com/fastfetch-cli/fastfetch/archive/refs/tags/$version.tar.gz"
+checksum=72d99687946774cb0a34bb48b3ef943db1b50d43e104fc20e6d775f5f3bb65b4

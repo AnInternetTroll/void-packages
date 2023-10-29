@@ -1,0 +1,13 @@
+# Template file for 'totp'
+pkgname=totp
+version=1.0.2
+revision=1
+build_style=gnu-makefile
+makedepends="uriparser-devel openssl-devel"
+short_desc="Generate TOTP codes from the command-line"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="0BSD"
+homepage="https://git.sr.ht/~mango/totp"
+changelog="https://git.sr.ht/~mango/totp/refs/"
+distfiles="https://git.sr.ht/~mango/totp/archive/v$version.tar.gz"
+checksum=d95e4e2c06db50c2df172a323c79c8491684d80ef6b4b14547df709df4e991b8

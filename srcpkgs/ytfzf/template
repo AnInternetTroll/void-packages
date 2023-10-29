@@ -1,0 +1,19 @@
+# Template file for 'ytfzf'
+pkgname=ytfzf
+version=2.6.1
+revision=2
+build_style=gnu-makefile
+make_use_env=yes
+depends="bash"
+short_desc="Posix script to find and watch youtube videos from the terminal"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-3.0-only"
+homepage="https://github.com/pystardust/ytfzf"
+changelog="${homepage}/releases/tag/v${version}"
+distfiles="${homepage}/archive/v${version}/${pkgname}-${version}.tar.gz"
+checksum=67a75673892e2eb6b0c262b0ebf2bc6ff25018fb02289f38feddb9bb4ba59451
+
+post_install() {
+	vman docs/man/${pkgname}.1
+	vman docs/man/${pkgname}.5
+}

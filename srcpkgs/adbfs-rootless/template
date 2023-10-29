@@ -1,0 +1,22 @@
+# Template file for 'adbfs-rootless'
+pkgname=adbfs-rootless
+version=0.0.0
+revision=1
+#archs="i686 x86_64"
+#build_wrksrc=
+build_style=gnu-makefile
+#configure_args=""
+make_build_args="CPPFLAGS=-D_FILE_OFFSET_BITS=64"
+#make_install_args=""
+#conf_files=""
+#make_dirs="/var/log/dir 0755 root root"
+hostmakedepends=""
+makedepends="fuse-devel fuse3-devel"
+depends="android-tools"
+short_desc="Mount Android phones on Linux with adb. No root required."
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="BSD"
+homepage="https://github.com/spion/adbfs-rootless"
+#changelog=""
+distfiles="https://github.com/spion/adbfs-rootless/archive/refs/heads/master.tar.gz"
+checksum=b97ebb17eb2064840990e84c6e67517e2064f0775446aab9779b0493fc50d8b4

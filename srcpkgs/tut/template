@@ -1,0 +1,17 @@
+# Template file for 'tut'
+pkgname=tut
+version=2.0.1
+revision=1
+build_style=go
+go_import_path="github.com/RasmusLindroth/tut"
+# hostmakedepends="git"
+short_desc="TUI client for Mastodon"
+maintainer="Nathaniel Barragan <nathanielbarragan@protonmail.com>"
+license="MIT"
+homepage="https://github.com/RasmusLindroth/tut"
+distfiles="https://github.com/RasmusLindroth/tut/archive/${version}.tar.gz"
+checksum=afa8c49036461a36c091d83ef51f9a3bbd938ee78f817c6467175699a989b863
+
+post_install() {
+	vlicense LICENSE
+}

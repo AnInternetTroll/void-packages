@@ -1,0 +1,22 @@
+# Template file for 'harec'
+pkgname=harec
+version=1
+revision=1
+#archs="i686 x86_64"
+#build_wrksrc=
+build_style=configure
+#configure_args=""
+#make_build_args=""
+#make_install_args=""
+#conf_files=""
+#make_dirs="/var/log/dir 0755 root root"
+hostmakedepends="qbe scdoc"
+makedepends=""
+depends=""
+short_desc="Hare bootstrap compiler"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-3.0-or-later"
+homepage="https://git.sr.ht/~sircmpwn/harec/"
+changelog="https://git.sr.ht/~sircmpwn/harec/log"
+distfiles="https://git.sr.ht/~sircmpwn/harec/archive/88ac641c900e5a926f96b61033798041df1a8245.tar.gz"
+checksum=a699efff6e5259243c511a2716a89504045909313851d46c9c5a18331563d8c3

@@ -1,0 +1,23 @@
+# Template file for 'ladybird'
+pkgname=ladybird
+version=1
+revision=1
+#archs="i686 x86_64"
+#build_wrksrc=
+build_style=cmake
+configure_args="-GNinja -DBUILD_LAGOM=ON"
+build_wrksrc=Ladybird
+#make_build_args=""
+#make_install_args=""
+#conf_files=""
+#make_dirs="/var/log/dir 0755 root root"
+hostmakedepends="cmake ninja"
+makedepends="libglapi qt6-base-devel qt6-svg-devel qt6-tools-devel qt6-wayland-devel qt6-multimedia-devel"
+depends=""
+short_desc="Ladybird is a web browser built on the LibWeb and LibJS engines from SerenityOS with a cross-platform GUI in Qt."
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-3.0-or-later"
+homepage="https://github.com/SerenityOS/serenity/"
+#changelog=""
+distfiles="https://github.com/SerenityOS/serenity/archive/master.tar.gz"
+checksum=32c23de3d824101110a2b72a12c4bf54357a4e058b4cedee120925a6e2f58712
