@@ -1,0 +1,22 @@
+# Template file for 'code-minimap'
+pkgname=code-minimap
+version=0.6.4
+revision=1
+build_style=cargo
+build_helper=qemu
+short_desc="High performance code minimap render"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT, Apache-2.0"
+homepage="https://github.com/wfxr/code-minimap/"
+changelog="https://github.com/wfxr/code-minimap/releases/"
+distfiles="https://github.com/wfxr/code-minimap/archive/refs/tags/v$version.tar.gz"
+checksum=4e2f15e4a0f7bd31e33f1c423e3120318e13de1b6800ba673037e38498b3a423
+
+post_install() {
+	for shell in bash fish zsh; do
+		vtargetrun ${DESTDIR}/usr/bin/code-minimap completion ${shell} > code-minimap.${shell}
+		vcompletion code-minimap.${shell} ${shell}
+	done
+
+	vlicense LICENSE-MIT
+}
