@@ -1,0 +1,39 @@
+# Template file for 'gotosocial'
+pkgname=gotosocial
+version=0.16.0
+revision=1
+build_style=go
+go_import_path="github.com/superseriousbusiness/gotosocial"
+go_package="github.com/superseriousbusiness/gotosocial/cmd/gotosocial"
+hostmakedepends="go-swagger yarn"
+conf_files="/etc/gotosocial.yaml"
+make_dirs="/var/lib/gotosocial 0755 _gotosocial _gotosocial"
+short_desc="Fast, fun, ActivityPub server, powered by Go"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="AGPL-3.0-only"
+homepage="https://gotosocial.org/"
+changelog="https://github.com/superseriousbusiness/gotosocial/releases"
+distfiles="https://github.com/superseriousbusiness/gotosocial/releases/download/v$version/gotosocial-$version-source-code.tar.gz"
+ # https://github.com/superseriousbusiness/gotosocial/releases/download/v$version/gotosocial_${version}_web-assets.tar.gz"
+checksum=0fca2791bc62d0e8c3a4f62d7e6bb203d358041ea1df233926eda2e6e476094c
+system_accounts="_gotosocial"
+
+post_build() {
+	yarn --cwd ./web/source install --frozen-lockfile
+	yarn --cwd ./web/source ts-patch install
+	yarn --cwd ./web/source build
+	swagger generate spec -o ./web/assets/swagger.yaml --scan-models
+}
+
+post_install() {
+	vmkdir etc/gotosocial
+	rm -rf web/source
+	vmkdir usr/share/webapps
+	cp -r web "$DESTDIR/usr/share/webapps/gotosocial"
+	vsconf example/apparmor/gotosocial gotosocial.apparmor
+	vconf example/config.yaml gotosocial.yaml
+	vsed -i "$DESTDIR/etc/gotosocial.yaml" -e 's#\./web#/usr/share/webapps/gotosocial#; s#"/gotosocial/#"/var/lib/gotosocial/#'
+	vsed -i "$DESTDIR/usr/share/webapps/gotosocial/assets/swagger.yaml" -e "s/REPLACE_ME/$version/"
+	vlicense LICENSE
+	vsv gotosocial
+}
