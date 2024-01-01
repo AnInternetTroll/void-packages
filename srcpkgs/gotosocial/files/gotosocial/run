@@ -1,0 +1,7 @@
+#!/bin/sh
+exec 2>&1
+[ -r ./conf ] && . ./conf
+ulimit -n ${MAX_OPEN_FILES:-8192}
+export GOTOSOCIAL_CONFIG="${GOTOSOCIAL_CONFIG:-/etc/gotosocial.yaml}"
+
+exec chpst -u _gotosocial:_gotosocial gotosocial  --config-path "${GOTOSOCIAL_CONFIG}" server start
