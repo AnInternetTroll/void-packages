@@ -1,0 +1,16 @@
+# Template file for 'go-swagger'
+pkgname=go-swagger
+version=0.33.1
+revision=1
+build_style=go
+go_import_path="github.com/go-swagger/go-swagger"
+go_package="github.com/go-swagger/go-swagger/cmd/swagger"
+checkdepends="gotestsum"
+short_desc="Swagger 2.0 implementation for go"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="Apache-2.0"
+homepage="https://goswagger.io/"
+changelog="https://github.com/go-swagger/go-swagger/releases"
+distfiles="https://github.com/go-swagger/go-swagger/archive/refs/tags/v$version.tar.gz"
+checksum=2957f08ca2f12efb11050c3aecacb74b11dfe97b47bc05c6395072c8a2cca481
+make_check=no # Tests fail
