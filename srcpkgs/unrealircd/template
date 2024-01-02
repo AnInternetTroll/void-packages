@@ -1,0 +1,25 @@
+# Template file for 'unrealircd'
+pkgname=unrealircd
+version=6.1.4
+revision=1
+#archs="i686 x86_64"
+#build_wrksrc=
+build_style=gnu-configure
+configure_args="--enable-dynamic-linking"
+#make_build_args=""
+#make_install_args=""
+#conf_files=""
+#make_dirs="/var/log/dir 0755 root root"
+hostmakedepends="tar"
+makedepends="libargon2-devel openssl-devel libcurl-devel libnsl-devel libsodium-devel pcre2-devel tre-devel"
+short_desc="Open Source IRC Server"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-2.0-only"
+homepage="https://www.unrealircd.org/"
+changelog="https://github.com/unrealircd/unrealircd/blob/unreal60_dev/doc/RELEASE-NOTES.md"
+distfiles="https://www.unrealircd.org/downloads/unrealircd-$version.tar.gz"
+checksum=628892362345bfe27fc40e4c0c775d879c2200f134b8f401b4ca633005928809
+
+post_install() {
+	vconf conf/examples/example.conf unrealircd.conf
+}
