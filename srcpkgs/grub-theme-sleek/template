@@ -1,0 +1,18 @@
+# Template file for 'grub-theme-sleek'
+pkgname=grub-theme-sleek
+version=20231231
+revision=1
+depends="grub>=2.0"
+short_desc="A sleek theme for grub2"
+maintainer="Orphaned <orphan@voidlinux.org>"
+license="MIT"
+homepage="https://github.com/sandesh236/sleek--themes.git"
+distfiles="https://github.com/sandesh236/sleek--themes/archive/0a680163a0711c4ed23d5d3b1b9a0f67115cb6d8.tar.gz"
+checksum=255f0cd7a2fdae15d4eb9c8c280d6e4605cbdd279932dc0d3d926563ee1a6e11
+
+do_install() {
+	vmkdir /usr/share/grub/themes
+	cp -r "Sleek theme-light/sleek" "$DESTDIR/usr/share/grub/themes/"
+	vlicense "Sleek theme-light/LICENSE"
+}
+
