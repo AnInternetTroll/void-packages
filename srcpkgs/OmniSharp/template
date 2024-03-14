@@ -1,0 +1,20 @@
+# Template file for 'OmniSharp'
+pkgname=OmniSharp
+version=1.39.12
+revision=1
+build_wrksrc="src/OmniSharp.Stdio.Driver"
+build_style=dotnet
+configure_args="--framework net6.0"
+short_desc="OmniSharp server (STDIO) based on Roslyn workspaces"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT"
+homepage="https://www.omnisharp.net/"
+changelog="https://github.com/OmniSharp/omnisharp-roslyn/releases/"
+distfiles="https://github.com/OmniSharp/omnisharp-roslyn/archive/refs/tags/v$version.tar.gz"
+checksum=c17b4f8a21aa93538b786934b49a43e79ac714ca87c11d4d2d6e5ef52a72a846
+
+post_install() {
+	mkdir -p "$DESTDIR/usr/bin/"
+	ln -s "../lib/OmniSharp/OmniSharp" "$DESTDIR/usr/bin/"
+	vlicense "$wrksrc/license.md"
+}
