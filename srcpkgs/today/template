@@ -1,0 +1,13 @@
+# Template file for 'today'
+pkgname=today
+version=6.2.0
+revision=1
+build_style=gnu-makefile
+hostmakedepends="scdoc"
+short_desc="Script for keeping a daily journal"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-3.0-or-later,CC0-1.0"
+homepage="https://sr.ht/~sotirisp/today/"
+changelog="https://git.sr.ht/~sotirisp/today/refs"
+distfiles="https://git.sr.ht/~sotirisp/today/archive/v$version.tar.gz"
+checksum=d588907773208ea2ce351e307b54e51a74932f330cc97cb0465d6c49491183df
