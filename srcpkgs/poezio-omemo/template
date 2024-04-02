@@ -1,0 +1,14 @@
+# Template file for 'poezio-omemo'
+pkgname=poezio-omemo
+version=0.7.0
+revision=1
+build_style=python3-pep517
+hostmakedepends="python3-setuptools python3-wheel"
+depends="python3-slixmpp-omemo"
+short_desc="OMEMO plugin for poezio"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-3.0-only"
+homepage="https://codeberg.org/poezio/poezio-omemo"
+changelog="https://codeberg.org/poezio/poezio-omemo/raw/branch/main/ChangeLog"
+distfiles="https://codeberg.org/poezio/poezio-omemo/archive/v$version.tar.gz"
+checksum=ef63cb46038cac0edd6e25327d7382a6b490f436ecb1d680166f8a28a30ab2a3
