@@ -1,0 +1,13 @@
+# Template file for 'python3-omemo-backend-signal'
+pkgname=python3-omemo-backend-signal
+version=0.3.1
+revision=1
+build_style=python3-pep517
+hostmakedepends="python3-setuptools python3-wheel"
+depends="python3-x3dh python3-doubleratchet python3-omemo python3-cryptography python3-protobuf"
+short_desc="Backend for python-omemo offering compatibility with libsignal"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-3.0-only"
+homepage="https://github.com/Syndace/python-omemo-backend-signal"
+distfiles="https://github.com/Syndace/python-omemo-backend-signal/archive/refs/tags/v$version-beta.tar.gz"
+checksum=54d9d454f1555dd152f6c7bc42f1de8b0091953b680562346697ae240fd1b204
