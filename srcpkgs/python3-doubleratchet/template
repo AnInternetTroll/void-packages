@@ -1,0 +1,19 @@
+# Template file for 'python3-doubleratchet'
+pkgname=python3-doubleratchet
+version=1.0.3
+revision=1
+build_style=python3-pep517
+hostmakedepends="python3-setuptools python3-wheel"
+depends="python3-cryptography python3-pydantic python3-typing_extensions"
+checkdepends="python3-pytest python3-pytest-asyncio $depends"
+short_desc="Python implementation of the Double Ratchet algorithm"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT"
+homepage="https://python-doubleratchet.readthedocs.io/en/latest/"
+changelog="https://github.com/Syndace/python-doubleratchet/raw/main/CHANGELOG.md"
+distfiles="https://github.com/Syndace/python-doubleratchet/archive/refs/tags/v$version.tar.gz"
+checksum=a254ace2b972d8adde25d7ba620e40249e47eb2ec4b5cb9a2657e0d565e024b0
+
+post_install() {
+	vlicense LICENSE
+}
