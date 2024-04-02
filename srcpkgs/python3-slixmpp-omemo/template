@@ -1,0 +1,14 @@
+# Template file for 'python3-slixmpp-omemo'
+pkgname=python3-slixmpp-omemo
+version=0.9.1
+revision=1
+build_style=python3-pep517
+hostmakedepends="python3-setuptools python3-wheel"
+depends="python3-slixmpp python3-omemo-backend-signal python3-omemo"
+short_desc="OMEMO for slixmpp"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-3.0-only"
+homepage="https://codeberg.org/poezio/slixmpp-omemo/"
+changelog="https://codeberg.org/poezio/slixmpp-omemo/raw/branch/main/ChangeLog"
+distfiles="https://codeberg.org/poezio/slixmpp-omemo/archive/v$version.tar.gz"
+checksum=e31327af911b463da6732e27adc454e749d3d7ffd3b7e6dda676903f8d5d9f4d
