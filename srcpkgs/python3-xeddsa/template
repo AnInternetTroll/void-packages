@@ -1,0 +1,20 @@
+# Template file for 'python3-xeddsa'
+pkgname=python3-xeddsa
+version=1.0.2
+revision=1
+build_style=python3-pep517
+hostmakedepends="python3-setuptools python3-wheel"
+makedepends="libsodium-devel"
+depends="libxeddsa python3-cffi python3-devel"
+checkdepends="python3-pytest $depends"
+short_desc="Python bindings to libxeddsa"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT"
+homepage="https://python-xeddsa.readthedocs.io/en/latest/"
+changelog="https://github.com/Syndace/python-xeddsa/raw/main/CHANGELOG.md"
+distfiles="https://github.com/Syndace/python-xeddsa/archive/refs/tags/v$version.tar.gz"
+checksum=b72b3265b7d69809aae8fcf063e0f2a72f1c600a47cc625813d5bda5a15b1731
+
+post_install() {
+	vlicense LICENSE
+}
