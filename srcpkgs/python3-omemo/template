@@ -1,0 +1,19 @@
+# Template file for 'python3-omemo'
+pkgname=python3-omemo
+version=1.0.2
+revision=1
+build_style=python3-pep517
+hostmakedepends="python3-setuptools python3-wheel"
+depends="python3-xeddsa python3-typing_extensions"
+short_desc="Python implementation of the OMEMO Multi-End Message Encryption protocol"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT"
+homepage="https://github.com/Syndace/python-omemo"
+changelog="https://github.com/Syndace/python-omemo/raw/main/CHANGELOG.md"
+distfiles="https://github.com/Syndace/python-omemo/archive/refs/tags/v$version.tar.gz"
+checksum=04efeab62d9f2c87224243f2ee8309a9fc76e237bcf569f9a97e975cf24c206f
+make_check="no" # Depends on python-oldmemo
+
+post_install() {
+	vlicense LICENSE
+}
