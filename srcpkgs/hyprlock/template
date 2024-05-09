@@ -1,0 +1,20 @@
+# Template file for 'hyprlock'
+pkgname=hyprlock
+version=0.3.0
+revision=1
+build_style=cmake
+hostmakedepends="pkg-config"
+makedepends="wayland-devel wayland-protocols cairo-devel libdrm-devel
+ pango-devel libxkbcommon-devel pam-devel file-devel libgbm-devel libglvnd-devel
+ hyprlang-devel"
+short_desc="Hyprland's GPU-accelerated screen locking utility"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="BSD-3-Clause"
+homepage="https://github.com/hyprwm/hyprlock"
+changelog="https://github.com/hyprwm/hyprlock/releases"
+distfiles="https://github.com/hyprwm/hyprlock/archive/refs/tags/v$version.tar.gz"
+checksum=5e84ac3223ea340bb3d39c22db4edefbb8364da8c3b6b3d0da1dfa45d8cc945f
+
+post_install() {
+	vlicense LICENSE
+}
