@@ -1,0 +1,22 @@
+# Template file for 'hyprlang'
+pkgname=hyprlang
+version=0.5.1
+revision=1
+build_style=cmake
+short_desc="Official implementation library for the hypr config language"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="LGPL-3.0-or-later"
+homepage="https://hyprland.org/hyprlang"
+changelog="https://github.com/hyprwm/hyprlang/releases"
+distfiles="https://github.com/hyprwm/hyprlang/archive/refs/tags/v$version.tar.gz"
+checksum=7f521906d3f40b8d7b2bfcbe29a8286e9c65a7a601994344278bc16325bbd75d
+
+hyprlang-devel_package() {
+	depends="${sourcepkg}>=${version}_${revision}"
+	short_desc+=" - development files"
+	pkg_install() {
+		vmove usr/include
+		vmove usr/lib/pkgconfig
+		vmove "usr/lib/*.so"
+	}
+}
