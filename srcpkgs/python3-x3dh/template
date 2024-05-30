@@ -1,6 +1,6 @@
 # Template file for 'python3-x3dh'
 pkgname=python3-x3dh
-version=1.0.3
+version=0.5.9
 revision=1
 build_style=python3-pep517
 hostmakedepends="python3-setuptools python3-wheel"
@@ -11,8 +11,8 @@ maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
 license="MIT"
 homepage="https://python-x3dh.readthedocs.io/en/latest/"
 changelog="https://github.com/Syndace/python-x3dh/blob/main/CHANGELOG.md"
-distfiles="https://github.com/Syndace/python-x3dh/archive/refs/tags/v$version.tar.gz"
-checksum=cbf48b05ef895ef2de9390e857bdb5a4c4cac468da999cf1f34cc159553811d6
+distfiles="https://github.com/Syndace/python-x3dh/archive/refs/tags/v$version-beta.tar.gz"
+checksum=9b751901deddeaa92a6014d83bfccebdb5a21bfc5f279bef6fac219c5b8fdf78
 
 post_install() {
 	vlicense LICENSE
