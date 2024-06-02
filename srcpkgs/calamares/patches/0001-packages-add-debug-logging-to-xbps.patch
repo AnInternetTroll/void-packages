@@ -1,0 +1,44 @@
+From 19430fac56b79327e8b466ebf562a71b7014022d Mon Sep 17 00:00:00 2001
+From: Luca Matei Pintilie <luca@lucamatei.com>
+Date: Sun, 28 Jul 2024 13:49:17 +0200
+Subject: [PATCH] packages: add debug logging to xbps
+
+---
+ src/modules/packages/main.py | 14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/src/modules/packages/main.py b/src/modules/packages/main.py
+index d2a2552ed..b1aa6e3ff 100644
+--- a/src/modules/packages/main.py
++++ b/src/modules/packages/main.py
+@@ -583,17 +583,23 @@ class PMPortage(PackageManager):
+ class PMXbps(PackageManager):
+     backend = "xbps"
+ 
++    def line_cb(self, line):
++        libcalamares.utils.debug(line)
++
++    def run_xbps(self, command):
++        libcalamares.utils.target_env_process_output(command, self.line_cb);
++
+     def install(self, pkgs, from_local=False):
+-        check_target_env_call(["xbps-install", "-Sy"] + pkgs)
++        self.run_xbps(["xbps-install", "-Sy"] + pkgs)
+ 
+     def remove(self, pkgs):
+-        check_target_env_call(["xbps-remove", "-Ry", "--noconfirm"] + pkgs)
++        self.run_xbps(["xbps-remove", "-Ry"] + pkgs)
+ 
+     def update_db(self):
+-        check_target_env_call(["xbps-install", "-S"])
++        self.run_xbps(["xbps-install", "-S"])
+ 
+     def update_system(self):
+-        check_target_env_call(["xbps", "-Suy"])
++        self.run_xbps(["xbps", "-Suy"])
+ 
+ 
+ class PMYum(PackageManager):
+-- 
+2.45.2
+
