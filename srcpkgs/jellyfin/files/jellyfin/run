@@ -1,0 +1,11 @@
+#!/bin/sh
+exec 2>&1
+[ -r ./conf ] && . ./conf
+
+datadir=${datadir:-/var/lib/jellyfin}
+cachedir=${cachedir:-/var/cache/jellyfin}
+logdir=${cachedir:-/var/log/jellyfin}
+webdir=${webdir:-/usr/share/webapps/jellyfin-web}
+opts=${opts:-""}
+
+exec chpst -C "/usr/lib/jellyfin" -u _jellyfin:_jellyfin jellyfin --webdir "${webdir}" --datadir "${datadir}" --cachedir "${cachedir}" --logdir "${logdir}" ${opts}
