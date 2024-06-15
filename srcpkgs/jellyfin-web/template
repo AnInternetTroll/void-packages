@@ -1,0 +1,30 @@
+# Template file for 'jellyfin-web'
+pkgname=jellyfin-web
+version=10.9.4
+revision=1
+hostmakedepends="nodejs"
+depends="jellyfin"
+short_desc="Web Client for Jellyfin"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-2.0-only"
+homepage="https://jellyfin.org/"
+changelog="https://github.com/jellyfin/jellyfin-web/releases"
+distfiles="https://github.com/jellyfin/jellyfin-web/archive/refs/tags/v${version}.tar.gz"
+checksum=fe91a946f85f8dfeda10c7b53b2575b3ebdea2bc6aa13895fdeda0f239d02f8c
+
+do_configure() {
+	npm ci --no-audit
+}
+
+do_build() {
+	npm run build:production
+}
+
+do_check() {
+	npm test
+}
+
+do_install() {
+	mkdir -p "$DESTDIR/usr/share/webapps/jellyfin-web"
+	cp -r dist/* "$DESTDIR/usr/share/webapps/jellyfin-web"
+}

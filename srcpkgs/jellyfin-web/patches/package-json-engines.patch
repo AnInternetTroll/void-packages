@@ -1,0 +1,22 @@
+commit 9f8248ae752009bc8ad5244dcf4c80f51f9cc866
+Author: Luca Matei Pintilie <luca@lucamatei.com>
+Date:   Sat Jun 15 15:10:11 2024 +0200
+
+    package.json: allow all engines
+
+diff --git a/package.json b/package.json
+index 280a2e135..b0f9523d0 100644
+--- a/package.json
++++ b/package.json
+@@ -155,8 +155,8 @@
+     "stylelint": "stylelint \"src/**/*.{css,scss}\""
+   },
+   "engines": {
+-    "node": ">=20.0.0",
+-    "npm": ">=9.6.4",
++    "node": "*",
++    "npm": "*",
+     "yarn": "YARN NO LONGER USED - use npm instead."
+   }
+ }
+
