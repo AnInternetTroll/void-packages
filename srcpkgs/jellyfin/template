@@ -1,0 +1,26 @@
+# Template file for 'jellyfin'
+pkgname=jellyfin
+version=10.9.6
+revision=1
+build_style=dotnet
+configure_args="--framework net8.0"
+make_build_args="Jellyfin.Server"
+depends="ffmpeg"
+short_desc="Free Software Media System"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-2.0-only"
+homepage="https://jellyfin.org/"
+changelog="https://github.com/jellyfin/jellyfin/releases"
+distfiles="https://github.com/jellyfin/jellyfin/archive/refs/tags/v${version}.tar.gz"
+checksum=183a114598347a3a5faebba04b524161c4424450fca4435b46b294d8088404ae
+
+system_accounts="_jellyfin"
+make_dirs="/var/lib/jellyfin 0700 _jellyfin _jellyfin
+ /var/cache/jellyfin 0700 _jellyfin _jellyfin
+ /var/log/jellyfin 0700 _jellyfin _jellyfin"
+
+post_install() {
+	mkdir -p "$DESTDIR/usr/bin/"
+	ln -s "../lib/jellyfin/jellyfin" "$DESTDIR/usr/bin/"
+	vsv jellyfin
+}
