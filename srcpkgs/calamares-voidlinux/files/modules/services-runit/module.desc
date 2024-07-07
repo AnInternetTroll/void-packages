@@ -1,0 +1,5 @@
+---
+type:       "job"
+name:       "services-runit"
+interface:  "python"
+script:     "main.py"

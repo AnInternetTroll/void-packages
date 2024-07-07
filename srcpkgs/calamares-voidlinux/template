@@ -1,0 +1,27 @@
+# Template file for 'calamares-voidlinux'
+pkgname=calamares-voidlinux
+version=0.0.0
+revision=1
+#archs="i686 x86_64"
+#build_wrksrc=
+# build_style=gnu-configure
+#configure_args=""
+#make_build_args=""
+#make_install_args=""
+#conf_files=""
+#make_dirs="/var/log/dir 0755 root root"
+# depends="calamares"
+short_desc="Void linux calamares config"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-3.0-or-later"
+homepage="https://voidlinux.org/"
+#changelog=""
+# distfiles=""
+# checksum=badbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadbadb
+
+do_install() {
+	vmkdir etc/calamares
+	vcopy "${FILESDIR}/etc/calamares" etc/
+	vmkdir usr/lib/calamares/modules
+	vcopy "${FILESDIR}/modules" usr/lib/calamares/
+}
