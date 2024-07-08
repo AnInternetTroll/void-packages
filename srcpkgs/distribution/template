@@ -1,0 +1,25 @@
+# Template file for 'distribution'
+pkgname=distribution
+version=3.0.0+alpha.1
+revision=1
+build_style=go
+go_import_path="github.com/distribution/distribution/v3"
+go_package="./..."
+short_desc="Toolkit to pack, ship, store, and deliver container content"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="Apache-2.0"
+homepage="https://distribution.github.io/distribution/"
+changelog="https://github.com/distribution/distribution/releases"
+distfiles="https://github.com/distribution/distribution/archive/refs/tags/v${version/+/-}.tar.gz"
+checksum=e21dc9127acb87c54759e408c63c38c362ee0fd81637c948df7e04948120044c
+conf_files="/etc/registry/config.yml"
+system_accounts="_distribution"
+_distribution_homedir="/var/lib/registry"
+make_dirs="/var/lib/registry 0700 _distribution _distribution
+ /etc/registry 755 _distribution _distribution"
+
+post_install() {
+	vmkdir etc/registry/
+	vinstall "${FILESDIR}/config.yml" 0644 etc/registry/
+	vsv distribution
+}

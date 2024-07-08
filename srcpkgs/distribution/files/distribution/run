@@ -1,0 +1,7 @@
+#!/bin/sh
+exec 2>&1
+[ -r conf ] && . ./conf
+OPTS=${OPTS:-"serve /etc/registry/config.yml"}
+
+exec chpst -u _distribution:_distribution registry ${OPTS}
+exec
