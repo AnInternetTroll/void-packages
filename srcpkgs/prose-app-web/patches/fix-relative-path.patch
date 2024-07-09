@@ -1,0 +1,13 @@
+diff --git a/config/common.json b/config/common.json
+index 5159310..6d77c2f 100644
+--- a/config/common.json
++++ b/config/common.json
+@@ -2,6 +2,6 @@
+   "platform": "web",
+ 
+   "context": {
+-    "basePath": "/"
++    "basePath": "/prose-app-web/"
+   }
+ }
+
