@@ -1,0 +1,13 @@
+# Template file for 'gotestsum'
+pkgname=gotestsum
+version=1.11.0
+revision=1
+build_style=go
+go_import_path="gotest.tools/gotestsum"
+short_desc="Go runner with output optimized for humans"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="Apache-2.0"
+homepage="https://github.com/gotestyourself/gotestsum"
+changelog="https://github.com/gotestyourself/gotestsum/releases"
+distfiles="https://github.com/gotestyourself/gotestsum/archive/refs/tags/v$version.tar.gz"
+checksum=b75695eff12ed246e6720c8ccd283c42bd4d5fd41a897ac258ffa6eebf17d40a
