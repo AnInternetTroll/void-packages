@@ -1,0 +1,14 @@
+# Template file for 'wlrobs'
+pkgname=wlrobs
+version=1.1
+revision=1
+build_style=meson
+hostmakedepends="pkg-config"
+makedepends="wlroots0.17-devel obs-devel"
+short_desc="OBS plugin for screen capture on wlroots based wayland compositors"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-3.0-or-later"
+homepage="https://hg.sr.ht/~scoopta/wlrobs"
+changelog="https://hg.sr.ht/~scoopta/wlrobs/tags"
+distfiles="https://hg.sr.ht/~scoopta/wlrobs/archive/v$version.tar.gz"
+checksum=5311c434316577b27803b272cb57011515f853705ef5d7e604ed73c483fa14be
