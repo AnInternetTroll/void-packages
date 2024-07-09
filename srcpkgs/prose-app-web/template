@@ -1,0 +1,29 @@
+# Template file for 'prose-app-web'
+pkgname=prose-app-web
+version=0.4.4
+revision=1
+hostmakedepends="nodejs"
+short_desc="XMPP client for team messaging"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MPL-2.0"
+homepage="https://prose.org/"
+changelog="https://github.com/prose-im/prose-app-web/releases"
+distfiles="https://github.com/prose-im/prose-app-web/archive/refs/tags/${version}.tar.gz"
+checksum=dfa917d4ff7602c59e0ec9699110d91b4819fbd973b8a2aebbc0284533cd6d2c
+
+do_configure() {
+	npm install
+}
+
+do_build() {
+	NODE_ENV=production npm run build
+}
+
+do_check() {
+	npm test
+}
+
+do_install() {
+	vmkdir /usr/share/webapps/prose-app-web
+	vcopy dist/* /usr/share/webapps/prose-app-web
+}
