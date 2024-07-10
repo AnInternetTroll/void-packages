@@ -1,0 +1,16 @@
+# Template file for 'b4'
+pkgname=b4
+version=0.14.0
+revision=1
+build_style=python3-pep517
+hostmakedepends="python3-setuptools python3-wheel"
+depends="python3-requests git-filter-repo python3-dkimpy python3-patatt python3-dnspython git"
+checkdepends="python3-pytest ${depends}"
+short_desc="B4 workflow tools"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-2.0-or-later"
+homepage="https://git.kernel.org/pub/scm/utils/b4/b4.git/about/"
+changelog="https://git.kernel.org/pub/scm/utils/b4/b4.git/refs/"
+distfiles="https://git.kernel.org/pub/scm/utils/b4/b4.git/snapshot/b4-$version.tar.gz"
+checksum=a2470164ffeffd3b8217de658d2a2ee9053698f272268ac7563c752d605881d3
+make_check=no # FIXME: Weird error
