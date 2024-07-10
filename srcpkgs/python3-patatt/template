@@ -1,0 +1,18 @@
+# Template file for 'python3-patatt'
+pkgname=python3-patatt
+version=0.6.3
+revision=1
+build_style=python3-pep517
+hostmakedepends="python3-setuptools python3-wheel"
+depends="python3-pynacl"
+short_desc="Cryptographic patch attestation"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT-0"
+homepage="https://git.kernel.org/pub/scm/utils/patatt/patatt.git/about/"
+changelog="https://git.kernel.org/pub/scm/utils/patatt/patatt.git/refs/"
+distfiles="https://git.kernel.org/pub/scm/utils/patatt/patatt.git/snapshot/patatt-$version.tar.gz"
+checksum=d7cc136273541d659fa8f5a67e217ca5ad5685d7a180020f02e7e12029dcfd12
+
+post_install() {
+	vlicense COPYING
+}
