@@ -1,0 +1,430 @@
+# Template file for 'dotnet8-stage0'
+pkgname=dotnet8-stage0
+version=8.0.103
+revision=1
+
+# Tag of tarball generator.
+_gittag=v8.0.3
+
+# Versions of prebuilt artifacts and bootstrap tar
+_artifactsver="8.0.103-servicing.24117.1.centos.8-x64"
+_bootstrapver="8.0.103"
+_bootstraprel=0
+_runtimever=8.0.3
+_aspnetver=8.0.3
+_installerver=8.0.103
+
+_version_macro=${version%.*}
+_version_prior=1
+_version_name="${_version_macro//[.0]}"
+
+# x86: blocked by https://github.com/dotnet/runtime/issues/83509
+# armhf: blocked by https://github.com/dotnet/runtime/issues/77663
+# riscv64: port WIP https://github.com/dotnet/runtime/issues/84834
+# s390x | ppc64le: mono-based builds are not yet stable on musl
+# loongarch64: upstream code supported, blocked by binary tarball
+archs="x86_64* aarch64* armv*"
+build_style=meta
+hostmakedepends="curl python3 clang cmake tar jq unzip zip patchelf"
+makedepends="llvm15 mit-krb5-devel lttng-ust-devel icu-devel"
+depends="icu-libs"
+short_desc="NET Core stage0 bits for dotnet build"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT"
+homepage="https://dotnet.microsoft.com"
+changelog="https://github.com/dotnet/dotnet/releases"
+
+# https://learn.microsoft.com/en-us/dotnet/core/rid-catalog#linux-rids
+case $XBPS_MACHINE in
+	x86_64) _dotnet_arch="x64";;
+	x86_64-musl) _dotnet_arch="musl-x64";;
+	aarch64) _dotnet_arch="arm64";;
+	aarch64-musl) _dotnet_arch="musl-arm64";;
+	armv7l|armv6l) _dotnet_arch="arm";;
+	# TODO: Does this target exist?
+	armv7l-musl|armv6l-musl) _dotnet_arch="musl-arm";;
+	i686) _dotnet_arch="x86";;
+	*) _dotnet_arch=$XBPS_MACHINE;;
+esac
+case $XBPS_TARGET_MACHINE in
+	x86_64) _dotnet_target="x64";;
+	x86_64-musl) _dotnet_target="musl-x64";;
+	aarch64) _dotnet_target="arm64";;
+	aarch64-musl) _dotnet_target="musl-arm64";;
+	armv7l|armv6l) _dotnet_target="arm";;
+	# TODO: Does this target exist?
+	armv7l-musl|armv6l-musl) _dotnet_target="musl-arm";;
+	i686) _dotnet_target="x86";;
+	*) _dotnet_target=$XBPS_TARGET_MACHINE;;
+esac
+
+_dotnet_sdk_file="dotnet-sdk-$_bootstrapver-linux-$_dotnet_arch.tar.gz"
+_sourcebuilt_artifacts_file="Private.SourceBuilt.Artifacts.$_artifactsver.tar.gz"
+
+distfiles="https://github.com/dotnet/dotnet/archive/refs/tags/$_gittag.tar.gz
+ https://github.com/dotnet/dotnet/releases/download/$_gittag/release.json>dotnet-release-$_gittag.json
+ https://dotnetcli.azureedge.net/source-built-artifacts/assets/${_sourcebuilt_artifacts_file}
+ https://dotnetcli.azureedge.net/dotnet/Sdk/$_bootstrapver/${_dotnet_sdk_file}"
+
+checksum="1cf467f47168572aae8cbcbf8fede972b31c8c1177f6584560a7fe4aecd66d19
+ 4d121bb6bb80ea2e408e74e0678d17b33c74c83ca667066f3cc8d3073b106d80
+ eadeef8d7fcc415a7b324d5cf6fe6c8dcc302d42262cf743fdbbe74f9646044b"
+
+case $_dotnet_arch in
+	x64) checksum+=" 72374c50ff27547867d50b64461882c8afb1d66ad2185c2d19b89a7c9c2f6246" ;;
+	musl-x64) checksum+=" 59125a76676be0fd3d028e9512f46d9b134dc5f5eceb92d1cf762ba9047f75a1" ;;
+	*) ;;
+esac
+
+skip_extraction="dotnet-release-$_gittag.json
+ ${_dotnet_sdk_file}
+ ${_sourcebuilt_artifacts_file}"
+
+_packagesdir="$wrksrc"/local-packages
+_libdir="/usr/lib"
+_nugetdir="$wrksrc"/nuget
+_downloaddir="$wrksrc"/local-downloads
+_cli_root="$wrksrc"/bootstrap
+_nuget="$_cli_root/dotnet nuget"
+_outputdir="$wrksrc"/artifacts
+_logdir="$wrksrc"/logs
+
+_srcdir="${XBPS_SRCDISTDIR}/${pkgname}-${version}"
+
+do_configure() {
+	mkdir -p "$_cli_root"
+	mkdir -p $_packagesdir $_downloaddir $_outputdir $_nugetdir $_logdir
+
+	# sdk insists on downloading its own dotnet unless ArcadeBuildFromSource
+	# is true, which opens up a can of worms
+	sed 's|ArcadeBuildFromSource=true|Architecture|' -i src/sdk/eng/restore-toolset.sh
+
+	# links logfiles to pipeline logs for easy pickup in pipelines
+	mkdir -p "$_logdir" "$wrksrc"/artifacts
+	ln -s "$_logdir" "$wrksrc"/artifacts/logs
+	ln -s "$_logdir" "$wrksrc"/artifacts/log
+	for i in "$wrksrc"/src/*; do
+		if [ -f "$i" ]; then
+			continue
+		fi
+		mkdir -p "$_logdir"/${i##*\/} "$wrksrc"/src/${i##*\/}/artifacts
+		ln -s "$_logdir"/${i##*\/} "$wrksrc"/src/${i##*\/}/artifacts/log
+	done
+
+	bsdtar -xf "$_srcdir"/${_dotnet_sdk_file} -C "$_cli_root" --no-same-owner
+
+	# adjusts sdk version and packagedir to expected
+	for i in runtime sdk installer aspnetcore roslyn; do
+		$_nuget add source $_packagesdir --name local --configfile "$wrksrc"/src/$i/NuGet.config
+		tmp=$(mktemp)
+		jq ".sdk.version = \"$_bootstrapver\"" "$wrksrc"/src/$i/global.json > $tmp && mv $tmp "$wrksrc"/src/$i/global.json
+	done
+
+	# extracting PackageVersions.props as some version information is there
+	bsdtar -xzf "$_srcdir"/${_sourcebuilt_artifacts_file} PackageVersions.props
+
+	# sdk looks for TestCli at wrong place
+	sed '/<TestCliNuGetDirectoryTargetFramework/d' -i "$wrksrc"/src/sdk/src/Layout/redist/targets/GenerateLayout.targets
+}
+
+_init() {
+	export _InitializeDotNetCli=$_cli_root
+	export DOTNET_INSTALL_DIR=$_cli_root
+	export PATH="$_cli_root:$PATH"
+	export NUGET_PACKAGES=$_nugetdir
+	export DotNetBuildFromSource=true
+	export DOTNET_CLI_TELEMETRY_OPTOUT=true
+	export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
+	export SHELL=/bin/bash
+	export EXTRA_CPPFLAGS="${CPPFLAGS/--sysroot=$CBUILDROOT}"
+	export EXTRA_CXXFLAGS="${CXXFLAGS/--sysroot=$CBUILDROOT}"
+	export EXTRA_CFLAGS="${CFLAGS/--sysroot=$CBUILDROOT}"
+	export EXTRA_LDFLAGS="$LDFLAGS"
+	unset CXXFLAGS CFLAGS LDFLAGS CPPFLAGS
+
+	ulimit -n 4096
+
+	"$_cli_root"/dotnet build-server shutdown
+}
+
+_runtime() {
+	_init
+	if [ -z "${_runtimever+x}" ]; then
+		local _runtimever=$(grep OutputPackageVersion "$wrksrc"/prereqs/git-info/runtime.props | sed -E 's|</?OutputPackageVersion>||g' | tr -d ' ')
+	fi
+	local _runtimever_ns=$(awk '{if($2 ~ "Name=\"VS.Redist.Common.NetCore.SharedFramework.x64.*\""){print $3}}' "$wrksrc"/src/installer/eng/Version.Details.xml | awk -F '"' '{print $2}')
+
+	msg_normal "[$(date)] Building runtime version $_runtimever"
+	cd "$wrksrc"/src/runtime
+
+	local args="
+		-c Release
+		-bl
+		-clang
+		-arch ${_dotnet_target#musl-}
+		/consoleLoggerParameters:ShowTimestamp
+		/p:NoPgoOptimize=true
+		/p:EnableNgenOptimization=false
+		/p:ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch=none
+		/p:_toolsRID=linux-$_dotnet_arch
+		/p:OutputRid=linux-$_dotnet_target
+		/p:GitCommitHash=$(grep GitCommitHash "$wrksrc"/prereqs/git-info/runtime.props | sed -E 's|</?GitCommitHash>||g' | tr -d ' ')
+		"
+	if [ "$XBPS_TARGET_MACHINE" != "$XBPS_MACHINE" ]; then
+		local args="$args -cross"
+		# https://github.com/dotnet/runtime/pull/75597 broke crossbuilding when true
+		local DotNetBuildFromSource=false
+		# x86 build of mono broken, thus do not build mono
+		case $_dotnet_target in
+			*x86) local args="$args /p:DefaultSubsets=clr+libs+host+packs";;
+		esac
+	fi
+	if [ "$_runtimever" != "${_runtimever##*-}" ]; then
+		local args="$args /p:VersionSuffix=${_runtimever##*-}"
+	fi
+	DotNetBuildFromSource=$DotNetBuildFromSource ROOTFS_DIR="$XBPS_CROSS_BASE" ./build.sh $args
+
+	for i in artifacts/packages/*/*/*.nupkg; do
+		$_nuget push $i --source="$_packagesdir"
+	done
+	mkdir -p "$_downloaddir"/Runtime/$_runtimever_ns
+	cp artifacts/packages/*/*/dotnet-runtime-*-*.tar.gz $_downloaddir/Runtime/$_runtimever_ns
+}
+
+_sdk() {
+	set -x
+	_init
+	if [ -z "${_sdkver+x}" ]; then
+		local _sdkver=$(grep OutputPackageVersion "$wrksrc"/prereqs/git-info/sdk.props | sed -E 's|</?OutputPackageVersion>||g' | tr -d ' ')
+	fi
+	local _sdkver_ns=$(awk '{if($2 == "Name=\"Microsoft.NET.Sdk\""){print $3}}' "$wrksrc"/src/installer/eng/Version.Details.xml | awk -F '"' '{print $2}')
+
+	msg_normal "[$(date)] Building sdk version $_sdkver"
+	cd "$wrksrc"/src/sdk
+
+	local _git_commit_hash="$(grep GitCommitHash "$wrksrc"/prereqs/git-info/sdk.props | sed -E 's|</?GitCommitHash>||g' | tr -d ' ')"
+
+	local args="
+		-c Release
+		-bl
+		/consoleLoggerParameters:ShowTimestamp
+		/p:GitCommitHash=${_git_commit_hash}
+		/p:RepositoryCommit=${_git_commit_hash}
+		/p:RepositoryUrl=${homepage}
+		/p:PackageProjectUrl=${homepage}
+		/p:Architecture=${_dotnet_target#musl-}
+		/p:TestCliNuGetDirectoryTargetFramework=netcoreapp3.1
+		"
+	if [ "$_sdkver" != "${_sdkver##*-}" ]; then
+		local args="$args /p:VersionSuffix=${_sdkver##*-}"
+	fi
+	set +x
+	./build.sh --pack /p:Projects=$wrksrc/src/sdk/source-build.slnf $args
+
+	for i in artifacts/packages/*/*/*.nupkg; do
+		$_nuget push $i --source="$_packagesdir"
+	done
+	mkdir -p "$_downloaddir"/Sdk/$_sdkver_ns
+	cp artifacts/packages/*/*/dotnet-toolset-internal-*.zip "$_downloaddir"/Sdk/$_sdkver_ns
+}
+
+_aspnetcore() {
+	_init
+	if [ -z "${_aspnetver+x}" ]; then
+		local _aspnetver=$(grep OutputPackageVersion "$wrksrc"/prereqs/git-info/aspnetcore.props | sed -E 's|</?OutputPackageVersion>||g' | tr -d ' ')
+	fi
+	local _aspnetver_ns=$(awk '{if($2 == "Name=\"Microsoft.AspNetCore.App.Ref.Internal\""){print $3}}' "$wrksrc"/src/installer/eng/Version.Details.xml | awk -F '"' '{print $2}')
+
+	msg_normal "[$(date)] Build aspnetcore version $_aspnetver"
+	cd "$wrksrc"/src/aspnetcore
+
+	local _os_name="linux"
+	if [ "$XBPS_TARGET_LIBC" = "musl" ]; then
+		_os_name+="-musl"
+	fi
+	local _git_commit_hash="$(grep GitCommitHash "$wrksrc"/prereqs/git-info/aspnetcore.props | sed -E 's|</?GitCommitHash>||g' | tr -d ' ')"
+
+	local args="
+		-c Release
+		-bl
+		--os-name ${_os_name}
+		-arch ${_dotnet_target#musl-}
+		-no-build-nodejs
+		/consoleLoggerParameters:ShowTimestamp
+		/p:BuildNodeJs=false
+		/p:BuildOSName=${_os_name}
+		/p:GitCommitHash=${_git_commit_hash}
+		/p:RepositoryCommit=${_git_commit_hash}
+		/p:RepositoryUrl=${homepage}
+		/p:PackageProjectUrl=${homepage}
+		/p:DotNetAssetRootUrl=file://$_downloaddir/
+		/p:EnablePackageValidation=false
+		"
+	if [ "$_aspnetver" != "${_aspnetver##*-}" ]; then
+		local args="$args /p:VersionSuffix=${_aspnetver##*-}"
+	fi
+
+	# aspnetcore can't find newly created Microsoft.NETCore.App.Runtime.linux-musl-x86 for some reason
+	case $_dotnet_target in
+		riscv64|x86) local args="$args /p:CrossgenOutput=false";;
+	esac
+
+	./eng/build.sh --pack $args
+
+	for i in artifacts/packages/*/*/*.nupkg; do
+		$_nuget push $i --source="$_packagesdir"
+	done
+
+	mkdir -p "$_downloaddir"/aspnetcore/Runtime/$_aspnetver_ns
+	cp artifacts/installers/*/aspnetcore-runtime-*-linux-$_dotnet_target.tar.gz "$_downloaddir"/aspnetcore/Runtime/$_aspnetver_ns
+	cp artifacts/installers/*/aspnetcore_base_runtime.version "$_downloaddir"/aspnetcore/Runtime/$_aspnetver_ns
+}
+
+_installer() {
+	_init
+	msg_normal "[$(date)] Building installer version $_installerver"
+	cd "$wrksrc"/src/installer
+
+	local _os_name="linux"
+	if [ "$XBPS_TARGET_LIBC" = "musl" ]; then
+		_os_name+="-musl"
+	fi
+	local _git_commit_hash="$(grep GitCommitHash "$wrksrc"/prereqs/git-info/installer.props | sed -E 's|</?GitCommitHash>||g' | tr -d ' ')"
+
+	local args="
+		-c Release
+		-bl
+		/consoleLoggerParameters:ShowTimestamp
+		/p:EnableSourceLink=false
+		/p:OSName=${_os_name}
+		/p:HostOSName=${_os_name}
+		/p:Architecture=${_dotnet_target#musl-}
+		/p:CoreSetupBlobRootUrl=file://$_downloaddir/
+		/p:DotnetToolsetBlobRootUrl=file://$_downloaddir/
+		/p:GitCommitHash=${_git_commit_hash}
+		/p:GitCommitCount=1
+		/p:RepositoryCommit=${_git_commit_hash}
+		/p:RepositoryUrl=${homepage}
+		/p:PackageProjectUrl=${homepage}
+		/p:PublicBaseURL=file://$_downloaddir/
+		"
+	if [ "$_installerver" != "${_installerver##*-}" ]; then
+		local args="$args /p:VersionSuffix=${_installerver##*-}"
+	fi
+	# crossgen broken on x86
+	case $_dotnet_target in
+		*riscv64|*x86) local args="$args /p:DISABLE_CROSSGEN=True";;
+	esac
+
+	./build.sh $args
+
+	mkdir  -p "$_downloaddir"/installer/$_installerver
+	cp artifacts/packages/*/*/dotnet-sdk-$_version_macro*.tar.gz "$_downloaddir"/installer/$_installerver
+}
+
+do_build() {
+	_runtime
+	_sdk
+	_aspnetcore
+	_installer
+}
+
+dotnet8-stage0-bootstrap_package() {
+	# TODO: Void equivalent?
+	# allows stage0 to be pulled by dotnetx-build if first build of dotnetx
+	# provides="dotnet$_version_name-bootstrap"
+	# provider_priority=$_version_prior
+	short_desc+=" - bootstrap files"
+
+	pkg_install() {
+		vlicense LICENSE.TXT
+		vlicense THIRD-PARTY-NOTICES.txt
+		local _iltoolsver=$(grep \<MicrosoftNETCoreILAsmVersion "$wrksrc"/PackageVersions.props | sed -E 's|</?MicrosoftNETCoreILAsmVersion>||g' | tr -d ' ')
+
+		install -dm 755 \
+			"$PKGDESTDIR"/$_libdir/dotnet/bootstrap/$version/docs \
+			"$PKGDESTDIR"/$_libdir/dotnet/bootstrap/$version/comp \
+			"$PKGDESTDIR"/$_libdir/dotnet/artifacts/$version
+
+		# unpack build artifacts to bootstrap subdir for use by future builds
+		bsdtar \
+			-xf "$_downloaddir"/installer/$_installerver/dotnet-sdk-$_version_macro*.tar.gz \
+			-C "$PKGDESTDIR"/$_libdir/dotnet/bootstrap/$version/ \
+			--no-same-owner
+
+		local _iltoolsArray="
+			runtime.*.Microsoft.NETCore.TestHost.*.nupkg
+			runtime.*.Microsoft.NETCore.ILAsm.*.nupkg
+			runtime.*.Microsoft.NETCore.ILDAsm.*.nupkg
+			"
+
+		local _nupkgsArray="
+			$_iltoolsArray
+			Microsoft.NETCore.App.Host.*.*.nupkg
+			Microsoft.NETCore.App.Runtime.*.*.nupkg
+			Microsoft.NETCore.App.Crossgen2.*.*.nupkg
+			runtime.*.Microsoft.NETCore.DotNetHost.*.nupkg
+			runtime.*.Microsoft.NETCore.DotNetHostPolicy.*.nupkg
+			runtime.*.Microsoft.NETCore.DotNetHostResolver.*.nupkg
+			runtime.*.Microsoft.NETCore.DotNetAppHost.*.nupkg
+			Microsoft.AspNetCore.App.Runtime.linux-*.*.nupkg
+			"
+
+		# copies artifacts to artifacts dir for use by future dotnet builds
+		for i in $_nupkgsArray; do install -Dm644 "$_packagesdir"/$i "$PKGDESTDIR"/$_libdir/dotnet/artifacts/$version/ || true; done
+
+		msg_normal "Changing iltools version to $_iltoolsver"
+		# source-build expects a certain version of ilasm, ildasm and testhost
+		# following adjusts version
+		for i in $_iltoolsArray; do
+			local nupath="$PKGDESTDIR"$_libdir/dotnet/artifacts/$version/$i
+			local nupath=$(find $nupath || true)
+			local nupkg="${nupath##*/}"
+			local nuname="${nupkg/.nupkg}"
+			if [ -z "${nuname/*rtm*}" ] || [ -z "${nuname/*servicing*}" ] || [ -z "${nuname/*preview*}" ]; then
+				nuname=${nuname%-*}
+			fi
+			local nuname="${nuname%.*.*.*}"
+			local nuver="${nupkg/$nuname.}"
+			local nuver="${nuver/.nupkg}"
+			local nuspec="$nuname.nuspec"
+
+			if [ ! "$nupath" ] || [ "$nupath" = "${nupath/$nuver/$_iltoolsver}" ]; then
+				continue
+			fi
+			# shellcheck disable=SC2094
+			unzip -p "$nupath" $nuspec | sed "s|$nuver|$_iltoolsver|" > "$wrkdir"/$nuspec
+			cd "$wrksrc"
+			# zip -u "$nupath" $nuspec
+			zip -u "$nupath"
+			mv "$nupath" "${nupath/$nuver/$_iltoolsver}"
+		done
+
+		find "${PKGDESTDIR}" -type f -perm -u+w -exec \
+				patchelf --replace-needed \
+					libc.musl-x86_64.so.1 libc.so \{} \;
+	}
+}
+
+dotnet8-stage0-artifacts_package() {
+	short_desc="Internal package for building .NET $_version_macro Software Development"
+	# TODO: Void alternative?
+	# hack to allow artifacts to pull itself
+	# provides="dotnet$_pkgver_name-bootstrap-artifacts"
+	# provider_priority=$_pkgver_prior
+
+	pkg_install() {
+		vlicense LICENSE.TXT
+		vlicense THIRD-PARTY-NOTICES.txt
+		# directory creation
+		install -dm 755 \
+			"$PKGDESTDIR"/${_libdir}/dotnet/artifacts/$version \
+			"$PKGDESTDIR"/usr/share/licenses
+
+		# extract artifacts to artifacts dir for use by future dotnet builds
+		bsdtar \
+			-xf "${_srcdir}/${_sourcebuilt_artifacts_file}" \
+			-C "$PKGDESTDIR/$_libdir/dotnet/artifacts/$version/" \
+			--no-same-owner
+	}
+}
