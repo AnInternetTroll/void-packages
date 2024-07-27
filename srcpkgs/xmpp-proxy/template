@@ -1,0 +1,19 @@
+# Template file for 'xmpp-proxy'
+pkgname=xmpp-proxy
+version=1.0.1
+revision=1
+build_style=cargo
+short_desc="XMPP reverse proxy and outgoing proxy"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="AGPL-3.0-or-later"
+homepage="https://code.moparisthebest.com/moparisthebest/xmpp-proxy/releases"
+changelog="https://code.moparisthebest.com/moparisthebest/xmpp-proxy/releases"
+distfiles="https://code.moparisthebest.com/moparisthebest/xmpp-proxy/archive/v${version}.tar.gz"
+checksum=4b0a0b3d358792a8861678a20c0a1ff9a2c3b33263bb3447c4a9ecc48df2aaf7
+conf_files="/etc/xmpp-proxy/xmpp-proxy.toml"
+
+post_install() {
+	vmkdir etc/xmpp-proxy
+	cp xmpp-proxy.toml "${DESTDIR}/etc/xmpp-proxy"
+	vlicense LICENSE.md
+}
