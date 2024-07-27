@@ -1,0 +1,18 @@
+# Template file for 'wcurl'
+pkgname=wcurl
+version=2024.07.10
+revision=1
+depends="curl"
+short_desc="Simple wrapper around curl to easily download files"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT"
+homepage="https://github.com/curl/wcurl"
+changelog="https://github.com/curl/wcurl/tags"
+distfiles="https://github.com/curl/wcurl/archive/refs/tags/${version}.tar.gz"
+checksum=962bb72e36e6f6cedbd21c8ca3af50e7dadd587a49d2482ab3226e76cf6dcc97
+
+do_install() {
+	vbin wcurl
+	vman wcurl.1
+	vlicense LICENSE
+}
