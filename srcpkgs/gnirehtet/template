@@ -1,0 +1,24 @@
+# Template file for 'gnirehtet'
+pkgname=gnirehtet
+version=2.5.1
+revision=1
+build_wrksrc="gnirehtet-$version/relay-rust"
+build_style=cargo
+depends="android-tools"
+short_desc="Gnirehtet provides reverse tethering for Android"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="Apache-2.0"
+homepage="https://github.com/Genymobile/gnirehtet/"
+changelog="https://github.com/Genymobile/gnirehtet/releases/"
+distfiles="https://github.com/Genymobile/gnirehtet/archive/refs/tags/v${version}.tar.gz
+ https://github.com/Genymobile/gnirehtet/releases/download/v${version}/gnirehtet-java-v${version}.zip"
+checksum="0d41361b9ac8b3b7fa4f4a0aff933472a72886556bd3fc4659be299b546274e6
+ 816748078fa6a304600a294a13338a06ac778bcc0e57b62d88328c7968ad2d3a"
+
+post_patch() {
+	vsed -i src/main.rs -e 's|"gnirehtet.apk"|"/usr/lib/gnirehtet/gnirehtet.apk"|'
+}
+
+post_install() {
+	vinstall "$XBPS_BUILDDIR/$pkgname-$version/gnirehtet-java/gnirehtet.apk" 644 /usr/lib/gnirehtet/
+}
