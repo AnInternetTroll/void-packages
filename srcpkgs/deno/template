@@ -1,0 +1,210 @@
+# Template file for 'deno'
+pkgname=deno
+version=1.43.5
+revision=1
+#archs="i686 x86_64"
+build_wrksrc="deno"
+build_style=cargo
+build_helper="qemu"
+configure_args="--no-default-features -vv"
+make_check_args="--no-fail-fast --workspace --exclude test_ffi"
+hostmakedepends="gn jq cmake clang18 curl lld18 python3 pkg-config ninja protobuf"
+makedepends="icu-devel clang18-devel glib-devel libffi-devel llvm18-devel
+ sqlite-devel zlib-devel libzstd-devel oniguruma-devel"
+depends="ca-certificates"
+checkdepends="nodejs"
+short_desc="Modern runtime for JavaScript and TypeScript"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT"
+homepage="https://deno.com/"
+changelog="https://github.com/denoland/deno/releases"
+_rusty_v8_ver=0.91.1
+_stacker_ver=0.1.15
+_chromium_ver=117.0.5881.2
+distfiles="https://github.com/denoland/deno/releases/download/v${version}/deno_src.tar.gz
+ https://static.crates.io/crates/v8/v8-${_rusty_v8_ver}.crate
+ https://github.com/rust-lang/stacker/archive/stacker-${_stacker_ver}.tar.gz
+ https://raw.githubusercontent.com/chromium/chromium/${_chromium_ver}/tools/generate_shim_headers/generate_shim_headers.py>generate_shim_headers-${_chromium_ver}.py"
+checksum="495e1cdb85d48990130c723ea9e458ba7669614451f7c4a1efcd8e4ae33e6092
+ 69026e2e8af55a4d2f20c0c17f690e8b31472bf76ab75b1205d3a0fab60c8f84
+ b410237fc8fed69f4e4df74bee640ac67aa51573862080bcf9d37b27a55e0468
+ b64f3bc06e74955d1027e3720a2ef14b6203722a5e7fe4c777a6b1051b9744dd"
+patch_args="-Np1 -d deno"
+skip_extraction="generate_shim_headers-${_chromium_ver}.py"
+make_check=no # Weird error pls explain
+
+# Don't use prebuilt libv8.a, build it from source (for rusty_v8).
+export V8_FROM_SOURCE=1
+
+# Use system gn and ninja (for v8).
+export GN=/usr/bin/gn
+export NINJA=/usr/bin/ninja
+
+# Flags for building v8; inspired by community/chromium and
+# https://github.com/12101111/overlay.
+export GN_ARGS="
+	chrome_pgo_phase=0
+	custom_toolchain=\"//build/toolchain/linux/unbundle:default\"
+	host_toolchain=\"//build/toolchain/linux/unbundle:default\"
+	v8_snapshot_toolchain=\"//build/toolchain/linux/unbundle:default\"
+	fatal_linker_warnings=false
+	is_debug=false
+	symbol_level=0
+	system_icu=true
+	system_zlib=true
+	use_custom_libcxx=false
+	use_sysroot=false
+	"
+export EXTRA_GN_ARGS="use_custom_libcxx=false"
+
+# deno seems to foolishly assume 8MiB stack
+# -A warnings - silence rust linter warnings
+export RUSTFLAGS="$RUSTFLAGS -C linker=clang -C link-arg=-fuse-ld=lld -C link-arg=--sysroot=${XBPS_CROSS_BASE} -C link-args=-Wl,-zstack-size=8388608 -A warnings -C link-lib=icui18n -C link-lib=icuuc -C link-lib=icudata"
+
+# Included limited debug info.
+export CARGO_PROFILE_RELEASE_DEBUG=1
+# Use "thin" instead of "fat" to speed up builds (it costs +4% binary size).
+export CARGO_PROFILE_RELEASE_LTO="thin"
+
+# Deno fine-tunes opt-level per crate.
+unset CARGO_PROFILE_RELEASE_OPT_LEVEL
+# Switching to panic=abort is too risky for Deno.
+unset CARGO_PROFILE_RELEASE_PANIC
+
+_setup_clang() {
+	export CC=clang
+	export CXX=clang++
+	export AR=llvm-ar
+	export NM=llvm-nm
+	export CFLAGS="-Wno-unknown-warning-option -fdebug-prefix-map=$wrksrc=."
+	export CXXFLAGS="-Wno-unknown-warning-option -fdebug-prefix-map=$wrksrc=."
+	export LDFLAGS=""
+	export BUILD_CC=clang
+	export BUILD_CXX=clang++
+	export BUILD_AR=llvm-ar
+	export BUILD_NM=llvm-nm
+	export BUILD_CFLAGS="-Wno-unknown-warning-option"
+	export BUILD_CXXFLAGS="-Wno-unknown-warning-option"
+	export CLANG_BASE_PATH="$(llvm-config --prefix)"
+	# Build with -g1 instead of -g (which is -g2); -g is added by abuild
+	# after sourcing APKBUILD, so is must be modified in a function.
+	export CFLAGS="${CFLAGS/-g/-g1}"
+	export CXXFLAGS="${CXXFLAGS/-g/-g1}"
+	# Increase stack size for 'cargo build' to avoid stack overflow.
+	export RUST_MIN_STACK="4194304"
+	if [[ -n "$CROSS_BUILD" ]]; then
+		CFLAGS+=" --sysroot=${XBPS_CROSS_BASE}"
+		CXXFLAGS+=" --sysroot=${XBPS_CROSS_BASE}"
+		LDFLAGS+=" --sysroot=${XBPS_CROSS_BASE}"
+		if [[ -z "$build_option_libcxx" ]]; then
+			local gcc_version=$(gcc -dumpversion)
+			local clang_version=$(clang -dumpversion)
+			CFLAGS+=" --gcc-toolchain=/usr"
+			CFLAGS+=" -nostdinc"
+			CFLAGS+=" -isystem ${XBPS_CROSS_BASE}/usr/include"
+			CFLAGS+=" -isystem /usr/lib/clang/${clang_version}/include"
+			CXXFLAGS+=" --gcc-toolchain=/usr"
+			CXXFLAGS+=" -nostdinc++"
+			CXXFLAGS+=" -isystem ${XBPS_CROSS_BASE}/usr/include/c++/${gcc_version%.*}"
+			CXXFLAGS+=" -isystem ${XBPS_CROSS_BASE}/usr/include/c++/${gcc_version%.*}/${XBPS_CROSS_TRIPLET}"
+			CXXFLAGS+=" -isystem ${XBPS_CROSS_BASE}/usr/include/c++/${gcc_version%.*}/backward"
+			CXXFLAGS+=" -nostdinc"
+			CXXFLAGS+=" -isystem ${XBPS_CROSS_BASE}/usr/include"
+			CXXFLAGS+=" -isystem /usr/lib/clang/${clang_version}/include"
+			LDFLAGS+=" --gcc-toolchain=/usr"
+		fi
+	fi
+}
+
+# Resolves version(s) of crate $1 in the depenendecy graph that satisfies
+# regular expression $2 (default is ".*").
+_crate_ver() {
+	cargo metadata --locked --format-version 1 \
+		| jq -r ".packages[] | select(.name == \"$1\" and (.version | test(\"$2\"))) | .version"
+}
+
+pre_patch() {
+	mkdir -p vendor
+	mv ../stacker-stacker-$_stacker_ver vendor/stacker
+	mv ../v8-$_rusty_v8_ver vendor/v8
+	mkdir -p vendor/v8/tools/generate_shim_headers
+	cp "${XBPS_SRCDISTDIR}/${pkgname}-${version}/generate_shim_headers-${_chromium_ver}.py" \
+		vendor/v8/tools/generate_shim_headers/generate_shim_headers.py
+
+	cd vendor/v8
+
+	local use_system="icu"
+	python3 build/linux/unbundle/replace_gn_files.py --system-libraries $use_system
+	local lib; for lib in $use_system; do
+		sed -i '/"\/\/base"/d' third_party/$lib/BUILD.gn
+		find . -type f -path "*third_party/$lib/*" \
+			\! -regex '.*\.\(gn\|gni\|isolate\|py\)' \
+			\! -name 'compression_utils_portable.*' \
+			-delete
+	done
+
+	cd "../.."
+
+	# Build with patched stacker and v8 (see *.patch files).
+	cat >> Cargo.toml <<-EOF
+
+		[patch.crates-io]
+		stacker = { path = "vendor/stacker" }
+		v8 = { path = "vendor/v8" }
+	EOF
+
+	# Rust target triple.
+	local target=$(rustc -vV | sed -n 's/host: //p')
+
+	# NOTE: zstd "pkg-config" feature doesn't work, so we have to do this.
+	mkdir -p .cargo
+	cat >> .cargo/config.toml <<-EOF
+		[target.$target]
+		z-ng = { rustc-link-lib = ["z-ng"], rustc-cfg = ["zng"] }
+		zstd = { rustc-link-lib = ["zstd"] }
+	EOF
+}
+
+post_configure() {
+	cargo fetch --target="${RUST_TARGET}" --locked
+
+	local stacker_ver="$(_crate_ver 'stacker')"
+	[ "$stacker_ver" = "$_stacker_ver" ] || (msg_error "Update _stacker_ver to $stacker_ver" && exit 1)
+
+	local rusty_v8_ver="$(_crate_ver 'v8')"
+	[ "$rusty_v8_ver" = "$_rusty_v8_ver" ] || (msg_error "Update _rusty_v8_ver to $rusty_v8_ver" && exit 1)
+
+	# FIXME: This test is perhaps broken.
+	rm -rf tests/specs/cert/cafile_install
+}
+
+pre_build() {
+	_setup_clang
+}
+
+pre_check() {
+	_setup_clang
+	# Skip some tests that don't work on CI (e.g. webgpu_test).
+	export CI=true
+}
+
+do_install() {
+	vbin "target/${RUST_TARGET}/release/deno"
+	vbin "target/${RUST_TARGET}/release/denort"
+	vlicense LICENSE.md
+}
+
+post_install() {
+	for _shell in bash fish zsh; do
+		vtargetrun "${DESTDIR}/usr/bin/deno" completions "${_shell}" > "deno.${_shell}"
+		vcompletion "deno.${_shell}" "${_shell}"
+	done
+}
+
+denort_package() {
+	short_desc="Deno runtime-only binary for deno compile"
+	pkg_install() {
+		vmove usr/bin/denort
+		vlicense LICENSE.md
+	}
+}
