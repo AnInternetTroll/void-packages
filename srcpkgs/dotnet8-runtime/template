@@ -1,0 +1,230 @@
+# Template file for 'dotnet8-runtime'
+pkgname=dotnet8-runtime
+version=8.0.7
+revision=1
+_testtag=4f2372af276898d8acbe92d77af30da86920bbce
+_bunnytag=v15
+_version_macro=${version%.*}
+_version_name=${_version_macro//[.0]}
+build_wrksrc="dotnet-${version}"
+#archs="i686 x86_64"
+# build_style=gnu-configure
+#configure_args=""
+#make_build_args=""
+#make_install_args=""
+#conf_files=""
+#make_dirs="/var/log/dir 0755 root root"
+hostmakedepends="curl python3 clang cmake tar jq unzip zip patchelf"
+makedepends="llvm18 mit-krb5-devel lttng-ust-devel icu-devel
+ dotnet${_version_name}-stage0-artifacts dotnet${_version_name}-stage0-bootstrap
+ dotnet${_version_name}-stage0"
+depends="icu-libs"
+# FIXME: Check depends from alpine to void
+# checkdepends="
+# 	babeltrace
+# 	binutils
+# 	coreutils
+# 	curl
+# 	file
+# 	gawk
+# 	jq
+# 	lttng-tools
+# 	npm
+# 	procps
+# 	py3-lldb
+# 	sed
+# 	strace
+# 	util-linux-misc
+# 	wget
+# 	which
+# 	"
+short_desc=".NET $_version_macro Core runtime"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT"
+homepage="https://dotnet.microsoft.com"
+changelog="https://github.com/dotnet/dotnet/releases"
+distfiles="https://github.com/dotnet/dotnet/archive/refs/tags/v${version}.tar.gz
+ https://github.com/dotnet/dotnet/releases/download/v${version}/release.json>dotnet-release-${version}.json
+ https://github.com/redhat-developer/dotnet-regular-tests/archive/${_testtag}.tar.gz>dotnet-testsuite-${_testtag}.tar.gz
+ https://github.com/redhat-developer/dotnet-bunny/archive/${_bunnytag}.tar.gz>dotnet-bunny-${_bunnytag}.tar.gz"
+checksum="c190bd7ee6b4ec26681ce4d36118f2e74f6cae8256604bbb6f24b6d42a3df57c
+ 65dbc9c82c7b9fddaa815339173d369aeae7e3b1664daa86184609bb58d0e1e0
+ 247dfa17abad562e24f1a584acc26eb7bcbcc97ff5c8eb3fdeb33a3f307e952d
+ 7711e70263abb71ee089ee35cf5e21e694801241e5c2c9bd93eb32d5c1af3490"
+patch_args="-Np1 -d dotnet-${version}"
+skip_extraction="dotnet-release-${version}.json"
+
+_rootdir="${XBPS_BUILDDIR}/${pkgname}-${version}"
+_builddir="${XBPS_BUILDDIR}/${pkgname}-${version}/dotnet-${version}"
+# _rootdir="$wrksrc/dotnet-$version"
+
+_version_prior=${version%.*.*}
+_version_sdk=${version/0./0.10}
+_checkdir="${_rootdir}/dotnet-bunny-${_bunnytag/v}"
+_testdir="${_rootdir}/dotnet-regular-tests-${_testtag}"
+_cli_root="${_builddir}/bootstrap"
+_libdir="/usr/lib"
+_libbase="${_libdir}/dotnet8"
+_logdir="${_builddir}/logs"
+
+# https://learn.microsoft.com/en-us/dotnet/core/rid-catalog#linux-rids
+case $XBPS_TARGET_MACHINE in
+	x86_64) _dotnet_arch="x64";;
+	x86_64-musl) _dotnet_arch="musl-x64";;
+	aarch64) _dotnet_arch="arm64";;
+	aarch64-musl) _dotnet_arch="musl-arm64";;
+	armv7l|armv6l) _dotnet_arch="arm";;
+	# TODO: Does this target exist?
+	armv7l-musl|armv6l-musl) _dotnet_arch="musl-arm";;
+	i686) _dotnet_arch="x86";;
+	*) _dotnet_arch=$XXBPS_TARGET_MACHINE;;
+esac
+
+# Build doesn't set all the right executable bits for the right file types
+_fix_executable() {
+	# add executable bit
+	find "$1" -type f \( \
+		-name 'apphost' -o \
+		-name 'singlefilehost' -o \
+		-name 'lib*so' \
+			\) \
+		-exec chmod +x '{}' \;
+
+	# remove executable bit
+	find "$1" -type f \( \
+		-name '*.a' -o \
+		-name '*.dll' -o \
+		-name '*.h' -o \
+		-name '*.json' -o \
+		-name '*.pdb' -o \
+		-name '*.props' -o \
+		-name '*.pubxml' -o \
+		-name '*.targets' -o \
+		-name '*.txt' -o \
+		-name '*.xml' \
+			\) \
+		-exec chmod -x '{}' \;
+}
+
+do_configure() {
+	# Using system libunwind is broken on aarch64|armv7, and unused on mono-based builds
+	# see https://github.com/dotnet/source-build/issues/2408,
+	case $XBPS_TARGET_MACHINE in
+		aarch64|armv7) msg_normal "Using bundled libunwind";;
+		armv6l) msg_normal "No libunwind used";;
+		*)
+			msg_normal "Using system libunwind"
+			# patch -p1 -i "$srcdir"/runtime_enable-system-libunwind.diff
+			;;
+	esac
+
+	# ensure that dotnet does not download artifacts provided by dotnet-artifacts
+	rm -rf packages/archive
+
+	# links logfiles to pipeline logs for easy pickup in pipelines
+	mkdir -p "$_logdir" artifacts
+	ln -s "$_logdir" artifacts/logs
+	ln -s "$_logdir" artifacts/log
+	for i in src/*; do
+		if [ -f "$i" ]; then
+			continue
+		fi
+		mkdir -p "$_logdir"/${i##*\/} src/${i##*\/}/artifacts
+		ln -s "$_logdir"/${i##*\/} src/${i##*\/}/artifacts/log
+	done
+
+	# dotnet requires its bootstrap to be in a writable dir
+	msg_normal "Setting up bootstrap"
+	local _bootstrapdir=$(find $_libdir/dotnet/bootstrap/$_pkgver_macro* -maxdepth 0 | sort -r | head -n 1)
+	if [ ! -d "$_cli_root" ]; then
+		cp -r "$_bootstrapdir" "$_cli_root"
+	fi
+}
+
+do_build() {
+	msg_normal "Building $pkgname-$pkgver"
+	ulimit -n 4096
+
+	# Disable use of LTTng as tracing on lttng <=2.13.0 is broken
+	# See https://github.com/dotnet/runtime/issues/57784.
+	# TODO: What is this in void?
+	# if [ -f "/usr/lib/liblttng-ust.so.1" ]; then
+	# 	export DOTNET_LTTng=0
+	# fi
+	export DOTNET_LTTng=0
+
+	case "$XBPS_TARGET_MACHINE" in
+		x86*) ;;
+		*)
+			# clang doesn't implement this outside of x86, and it causes a later configure to fail
+			export CFLAGS="${CFLAGS/-fstack-clash-protection}"
+			export CXXFLAGS="${CXXFLAGS/-fstack-clash-protection}"
+		;;
+	esac
+
+	# looks for most recent recent version of _artifactsdir
+	local _artifactsdir=$(find $_libdir/dotnet/artifacts/$_pkgver_macro* -maxdepth 0 | sort -r | head -n 1)
+
+	# ci args, else the output is forwarded to log files which isn't ideal in a
+	# pipeline environment, and build by defaults uses lots of space
+	local args="
+		/v:minimal
+		/p:LogVerbosity=minimal
+		/p:MinimalConsoleLogOutput=true
+		/p:CleanWhileBuilding=true
+		-maxcpucount:${XBPS_MAKEJOBS}
+		"
+
+	# part of https://github.com/dotnet/installer/pull/14792 that sets this flag
+	# was not integrated in 7.0.1xx yet
+	# UseSharedCompilation=false also reduces chances of hangups on mono-based builds
+	case "$XBPS_TARGET_MACHINE" in
+		riscv64|s390x|ppc64le) local args="$args /p:SourceBuildUseMonoRuntime=true /p:UseSharedCompilation=false";;
+	esac
+
+	# TODO: investigate SourceLink failures
+	local args="$args /p:EnableSourceLink=false"
+
+	# Sets TargetRid manually on edge as dotnet cannot be trusted to reliably
+	# compute the machine's runtime ID
+	# TODO: What is this in void?
+	# shellcheck disable=SC2034
+	if grep edge /etc/os-release; then
+		. /etc/os-release
+		local VERSION_ID_DOT="${VERSION_ID//[^.]}"
+		while [ ${#VERSION_ID_DOT} -gt 1 ]; do
+			local VERSION_ID="${VERSION_ID%.*}"
+			local VERSION_ID_DOT="${VERSION_ID//[^.]}"
+		done
+		local VERSION_ID_DASH="${VERSION_ID//[^_]}"
+		while [ ${#VERSION_ID_DASH} -ge 1 ]; do
+			local VERSION_ID="${VERSION_ID%_*}"
+			local VERSION_ID_DASH="${VERSION_ID//[^_]}"
+		done
+		local args="$args /p:TargetRid=$ID.$VERSION_ID-$_dotnet_arch"
+	fi
+
+	_releasepath="${XBPS_SRCDISTDIR}/${pkgname}-${version}/dotnet-release-${version}.json"
+	./build.sh \
+		--with-sdk "$_cli_root" \
+		--with-packages "$_artifactsdir" \
+		--source-repository "$(jq -r .sourceRepository "${_releasepath}")" \
+		--source-version "$(jq -r .sourceVersion "${_releasepath}")" \
+		-- $args
+}
+
+do_install() {
+	vmkdir etc/dotnet
+	echo "$_libbase" > "$DESTDIR/etc/dotnet/install_location"
+
+	vmkdir "$_libdir/dotnet/shared"
+
+	bsdtar \
+		-xf artifacts/${_dotnet_arch}/Release/dotnet-sdk-${_pkgver_macro}*.tar.gz \
+		-C "$DESTDIR"/${_libdir}/dotnet/ \
+		--no-same-owner \
+		./shared/Microsoft.NETCore.App
+
+	# some files either should or should not have executable bits
+	_fix_executable "$DESTDIR"
+}
