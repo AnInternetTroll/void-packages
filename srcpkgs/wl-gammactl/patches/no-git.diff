@@ -1,0 +1,31 @@
+diff --git a/meson.build b/meson.build
+index 5253f52..0b98bf5 100644
+--- a/meson.build
++++ b/meson.build
+@@ -27,25 +27,6 @@ run_command(
+ 	gres_xml
+ )
+ 
+-
+-# Get protocol extensions
+-git = find_program('git')
+-run_command(
+-	git,
+-	'submodule',
+-	'add',
+-	'https://github.com/swaywm/wlr-protocols.git',
+-	'wlr-protocols/'
+-)
+-run_command(
+-	git,
+-	'submodule',
+-	'update',
+-	'--init',
+-	'--recursive'
+-)
+-
+-
+ # Run wayland-scanner
+ wayland_scanner = find_program('wayland-scanner')
+ run_command(
+

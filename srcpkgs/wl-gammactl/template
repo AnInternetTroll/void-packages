@@ -1,0 +1,22 @@
+# Template file for 'wl-gammactl'
+pkgname=wl-gammactl
+version=0.0.0
+revision=1
+_wl_protocols_hash=c11408942e2fb54d41dadb84cdf844331076ae11
+_wl_gammactl_hash=07fc9fe9428301105863fd3a5844f92f2a87f33b
+build_style=meson
+hostmakedepends="pkg-config cmake glib-devel"
+makedepends="gtk+3-devel wlroots-devel"
+short_desc="App to set contrast, brightness, and gamma for wayland compositors"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-3.0-or-later"
+homepage="https://github.com/mischw/wl-gammactl"
+distfiles="https://github.com/mischw/wl-gammactl/archive/${_wl_gammactl_hash}.tar.gz
+ https://github.com/swaywm/wlr-protocols/archive/${_wl_protocols_hash}.tar.gz"
+checksum="30b33aaf8003a5bab8411173d0f7a91912cf63d7d60fb5e0e6242e4186f35847
+ e40da97a885299d4e633045a5c154da2470d51d42dc2b8530e96efd3fe3bf80a"
+skip_extraction="${_wl_protocols_hash}.tar.gz"
+
+post_extract() {
+	vsrcextract -C wlr-protocols "${_wl_protocols_hash}.tar.gz"
+}
