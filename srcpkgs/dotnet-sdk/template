@@ -2,7 +2,7 @@
 pkgname=dotnet-sdk
 version=8.0.7
 revision=1
-archs="x86_64"
+# archs="x86_64"
 hostmakedepends="curl python3 clang cmake tar jq"
 makedepends="llvm18 mit-krb5-devel lttng-ust-devel icu-devel"
 depends="icu-libs"
@@ -17,10 +17,21 @@ checksum="c190bd7ee6b4ec26681ce4d36118f2e74f6cae8256604bbb6f24b6d42a3df57c
  65dbc9c82c7b9fddaa815339173d369aeae7e3b1664daa86184609bb58d0e1e0"
 skip_extraction="release.json"
 
+case $XBPS_TARGET_MACHINE in
+	x86_64) _dotnet_target="x64";;
+	x86_64-musl) _dotnet_target="musl-x64";;
+	aarch64) _dotnet_target="arm64";;
+	aarch64-musl) _dotnet_target="musl-arm64";;
+	armv7l|armv6l) _dotnet_target="arm";;
+	# TODO: Does this target exist?
+	armv7l-musl|armv6l-musl) _dotnet_target="musl-arm";;
+	i686) _dotnet_target="x86";;
+	*) _dotnet_target=$XBPS_TARGET_MACHINE;;
+esac
+
 # Private stuff used throughout below
 _libbase="/usr/lib/dotnet"
 _binbase="/usr/bin/dotnet"
-_rid="x64"
 _releasepath="$XBPS_SRCDISTDIR/$pkgname-$version/release.json"
 
 pre_build() {
@@ -28,18 +39,24 @@ pre_build() {
 }
 
 do_build() {
+	set -x
 	PATH="/usr/libexec/chroot-git:${PATH}"
 	DOTNET_CLI_TELEMETRY_OPTOUT=1
+	ROOTFS_DIR="${XBPS_CROSS_BASE}"
 	bash ./build.sh \
 		--clean-while-building \
 		--online \
 		--source-repository "$(jq -r .sourceRepository "${_releasepath}")" \
-		--source-version "$(jq -r .sourceVersion "${_releasepath}")"
+		--source-version "$(jq -r .sourceVersion "${_releasepath}")" \
+		-- \
+		-p:TargetArchitecture="${_dotnet_target}" \
+		-p:CrossBuild=true
+	set +x
 }
 
 do_install() {
 	mkdir -p "${DESTDIR}${_libbase}"
-	tar xvf "artifacts/${_rid}/Release/dotnet-sdk-$(jq -r .sdkVersion "${_releasepath}")-void-${_rid}.tar.gz" -C "${DESTDIR}${_libbase}"
+	tar xvf "artifacts/${_dotnet_target}/Release/dotnet-sdk-$(jq -r .sdkVersion "${_releasepath}")-void-${_dotnet_target}.tar.gz" -C "${DESTDIR}${_libbase}"
 	mkdir -p "${DESTDIR}/usr/bin"
 	ln -s "$_libbase/dotnet" "$DESTDIR$_binbase"
 	mkdir -p "$DESTDIR/etc/dotnet"
@@ -56,7 +73,7 @@ dotnet-runtime_package() {
 	depends="icu-libs"
 	pkg_install() {
 		mkdir -p "${PKGDESTDIR}${_libbase}"
-		tar xvf "artifacts/${_rid}/Release/dotnet-runtime-${version}-void-${_rid}.tar.gz" -C "${PKGDESTDIR}${_libbase}"
+		tar xvf "artifacts/${_dotnet_target}/Release/dotnet-runtime-${version}-void-${_dotnet_target}.tar.gz" -C "${PKGDESTDIR}${_libbase}"
 		mkdir -p "${PKGDESTDIR}/usr/bin"
 		ln -s "$_libbase/dotnet" "$PKGDESTDIR$_binbase"
 		mkdir -p "$PKGDESTDIR/etc/dotnet"
@@ -69,6 +86,6 @@ aspnetcore-runtime_package() {
 	depends="dotnet-runtime>=${version}_${revision}"
 	pkg_install() {
 		mkdir -p "${PKGDESTDIR}${_libbase}"
-		tar xvf "artifacts/${_rid}/Release/aspnetcore-runtime-${version}-void-${_rid}.tar.gz" -C "${PKGDESTDIR}${_libbase}"
+		tar xvf "artifacts/${_dotnet_target}/Release/aspnetcore-runtime-${version}-void-${_dotnet_target}.tar.gz" -C "${PKGDESTDIR}${_libbase}"
 	}
 }
