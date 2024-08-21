@@ -3,8 +3,8 @@ pkgname=dotnet-sdk
 version=8.0.7
 revision=1
 # archs="x86_64"
-hostmakedepends="curl python3 clang cmake tar jq"
-makedepends="llvm18 mit-krb5-devel lttng-ust-devel icu-devel"
+hostmakedepends="curl python3 cmake clang tar jq icu-libs"
+makedepends="llvm18 mit-krb5-devel lttng-ust-devel icu-devel openssl-devel lldb-devel zlib-devel"
 depends="icu-libs"
 short_desc=".NET is the free framework for building apps and powerful services"
 maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
@@ -39,18 +39,35 @@ pre_build() {
 }
 
 do_build() {
+	echo "ENV START"
+	env
+	echo "ENV DONE"
 	set -x
+	args="
+		--clean-while-building
+		--online
+		--source-repository "$(jq -r .sourceRepository "${_releasepath}")"
+		--source-version "$(jq -r .sourceVersion "${_releasepath}")"
+		--use-mono-runtime
+	"
+	if [ "${CROSS_BUILD}" ]
+	then
+		args="
+			${args}
+			--
+			-p:TargetArchitecture="${_dotnet_target}"
+			-p:CrossBuild=true
+			-p:PortableBuild=true
+		"
+		export ROOTFS_DIR="${XBPS_CROSS_BASE}"
+		export TOOLCHAIN="${CC}"
+	fi
+
+	export CROSSCOMPILE=1
+	export PKG_CONFIG_PATH="${XBPS_CROSS_BASE}/usr/lib/pkgconfig"
 	PATH="/usr/libexec/chroot-git:${PATH}"
 	DOTNET_CLI_TELEMETRY_OPTOUT=1
-	ROOTFS_DIR="${XBPS_CROSS_BASE}"
-	bash ./build.sh \
-		--clean-while-building \
-		--online \
-		--source-repository "$(jq -r .sourceRepository "${_releasepath}")" \
-		--source-version "$(jq -r .sourceVersion "${_releasepath}")" \
-		-- \
-		-p:TargetArchitecture="${_dotnet_target}" \
-		-p:CrossBuild=true
+	bash ./build.sh ${args}
 	set +x
 }
 
