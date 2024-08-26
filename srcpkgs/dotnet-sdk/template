@@ -55,18 +55,16 @@ do_build() {
 		args="
 			${args}
 			--
-			-p:TargetArchitecture="${_dotnet_target}"
-			-p:CrossBuild=true
-			-p:PortableBuild=true
+			/p:TargetArchitecture=${_dotnet_target}
+			/p:PortableBuild=true
 		"
-		export ROOTFS_DIR="${XBPS_CROSS_BASE}"
-		export TOOLCHAIN="${CC}"
+		export ROOTFS_DIR="/"
 	fi
 
 	export CROSSCOMPILE=1
 	export PKG_CONFIG_PATH="${XBPS_CROSS_BASE}/usr/lib/pkgconfig"
-	PATH="/usr/libexec/chroot-git:${PATH}"
-	DOTNET_CLI_TELEMETRY_OPTOUT=1
+	export PATH="/usr/libexec/chroot-git:${PATH}"
+	export DOTNET_CLI_TELEMETRY_OPTOUT=1
 	bash ./build.sh ${args}
 	set +x
 }
