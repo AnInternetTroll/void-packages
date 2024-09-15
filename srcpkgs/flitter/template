@@ -1,0 +1,21 @@
+# Template file for 'flitter'
+pkgname=flitter
+version=1.1.3
+revision=1
+build_style=cargo
+hostmakedepends="pkg-config"
+makedepends="libX11-devel"
+short_desc="LiveSplit-inspired speedrunning split timer"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT"
+homepage="https://github.com/alexozer/flitter"
+changelog="https://github.com/alexozer/flitter/releases"
+distfiles="https://github.com/alexozer/flitter/archive/refs/tags/${version}.tar.gz"
+checksum=772dc7516758119bb2e351cda35f419a9db921829dd2c392de1d2a28a419c120
+
+post_install() {
+	vlicense LICENSE
+	for file in examples/*; do
+		vsconf "${file}"
+	done
+}
