@@ -1,0 +1,14 @@
+# Template file for 'mergiraf'
+pkgname=mergiraf
+version=0.2.0
+revision=1
+build_style=cargo
+depends="git"
+checkdepends="${depends}"
+short_desc="Syntax-aware git merge driver for programming languages and file formats"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-3.0-or-later"
+homepage="https://mergiraf.org/"
+changelog="https://codeberg.org/mergiraf/mergiraf/releases"
+distfiles="https://codeberg.org/mergiraf/mergiraf/archive/v${version}.tar.gz"
+checksum=fb496ef6470091dd9f133aeea18852067ce82c0dbccbdf1390dd66aec5e60e03
