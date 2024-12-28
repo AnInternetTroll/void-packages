@@ -1,0 +1,20 @@
+# Template file for 'nwg-displays'
+pkgname=nwg-displays
+version=0.3.22
+revision=1
+build_style=python3-pep517
+hostmakedepends="python3-setuptools"
+depends="python3-i3ipc python3-gobject gst1-python3"
+short_desc="Output management utility for sway"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT"
+homepage="https://github.com/nwg-piotr/nwg-displays"
+changelog="https://github.com/nwg-piotr/nwg-displays/releases/"
+distfiles="https://github.com/nwg-piotr/nwg-displays/archive/refs/tags/v${version}.tar.gz"
+checksum=143b034902200aabeb07ac7331066972127298654ea14d68b4f68fb7c38583da
+
+post_install() {
+	vinstall nwg-displays.svg 644 /usr/share/pixmaps/
+	vinstall nwg-displays.desktop 644 /usr/share/applications/
+	vlicense LICENSE
+}
