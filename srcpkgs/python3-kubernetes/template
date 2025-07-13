@@ -1,0 +1,16 @@
+# Template file for 'python3-kubernetes'
+pkgname=python3-kubernetes
+version=33.1.0
+revision=1
+build_style=python3-pep517
+hostmakedepends="python3-setuptools"
+depends="python3-certifi python3-six python3-dateutil python3-setuptools
+ python3-yaml python3-google-auth python3-websocket-client python3-requests
+ python3-requests-oauthlib python3-oauthlib python3-urllib3 python3-durationpy"
+short_desc="Official Python client library for kubernetes"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="Apache-2.0"
+homepage="https://kubernetes.io/"
+changelog="https://github.com/kubernetes-client/python/raw/master/CHANGELOG.md"
+distfiles="https://github.com/kubernetes-client/python/archive/refs/tags/v${version}.tar.gz"
+checksum=261ffb39e4a71803a95b19b542d61fe2fe05c616407db359e2ad901b8a8e4163
