@@ -1,0 +1,45 @@
+# Template file for 'syslog-ng'
+pkgname=syslog-ng
+version=4.10.2
+revision=1
+build_style=gnu-configure
+configure_args="--disable-java --disable-java-modules --disable-mqtt
+ --disable-riemann --enable-all-modules --enable-ipv6 --enable-manpages
+ --enable-spoof-source --enable-systemd --localstatedir=/var/lib/syslog-ng
+ --datadir=/usr/share --libexecdir=/usr/lib --sysconfdir=/etc/syslog-ng
+ --with-jsonc=system --with-pidfile-dir=/run --with-python-packages=system"
+conf_files="/etc/syslog-ng/syslog-ng.conf"
+make_dirs="/var/lib/syslog-ng 0755 root root"
+_depends="python3-boto3 python3-botocore python3-cachetools python3-certifi
+ python3-charset-normalizer python3-google-auth python3-idna python3-kubernetes
+ python3-oauthlib python3-pyasn1 python3-pyasn1-modules python3-dateutil
+ python3-yaml python3-requests python3-requests-oauthlib python3-rsa python3-six
+ python3-urllib3 python3-websocket-client python3-ply python3-tornado"
+hostmakedepends="automake pkg-config which tar protobuf python3-setuptools ${_depends}"
+makedepends="libfl-devel json-c-devel glib-devel pcre-devel libcurl-devel
+ libnet-devel libesmtp-devel net-snmp-devel libdbi-devel libmaxminddb-devel
+ protobuf-devel mongo-c-driver-devel libbson-devel grpc-devel hiredis-devel
+ rabbitmq-c-devel librdkafka-devel python3-devel"
+depends="${_depends}"
+short_desc="Enhanced log daemon, supporting a wide range of input and output methods"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage="https://www.syslog-ng.com/"
+changelog="https://github.com/syslog-ng/syslog-ng/raw/develop/NEWS.md"
+distfiles="https://github.com/syslog-ng/syslog-ng/releases/download/syslog-ng-${version}/syslog-ng-${version}.tar.gz"
+checksum=841503de6c2486e66fd08f0c62ac2568fc8ed1021297f855e8acd58ad7caff76
+
+post_install() {
+	vsv syslog-ng
+}
+
+syslog-ng-devel_package() {
+	depends="${sourcepkg}>=${version}_${revision}"
+	short_desc+=" - development files"
+	pkg_install() {
+		vmove usr/include
+		vmove usr/lib/pkgconfig
+		vmove "usr/lib/*.a"
+		vmove "usr/lib/*.so"
+	}
+}
