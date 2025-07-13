@@ -1,0 +1,16 @@
+# Template file for 'python3-durationpy'
+pkgname=python3-durationpy
+version=0.10
+revision=1
+build_style=python3-pep517
+hostmakedepends="python3-setuptools"
+short_desc="Converting between datetime.timedelta and Go's time.Duration strings"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MIT"
+homepage="https://github.com/icholy/durationpy"
+distfiles="https://github.com/icholy/durationpy/archive/refs/tags/${version}.tar.gz"
+checksum=ce67a884a8304f2227c6b27e8bab0831167bc346831ff6d069028969eb05d05b
+
+post_install() {
+	vlicense LICENSE
+}
