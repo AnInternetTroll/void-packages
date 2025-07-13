@@ -1391,6 +1391,7 @@ libxcb-cursor.so.0 xcb-util-cursor-0.1.0_1
 libgldi.so.3 libgldi-3.3.1_1
 libevdev.so.2 libevdev-1.2_1
 libgdiplus.so.0 libgdiplus-2.10.9_1
+libmongoc2.so.2 mongo-c-driver-devel-2.1.2_1
 libmonosgen-2.0.so.1 mono-3.2.3_1
 libshout-idjc.so.3 libshout-idjc-2.3.1_1
 libmonoboehm-2.0.so.1 mono-3.2.3_1
@@ -4032,7 +4033,7 @@ libKSeExprUI.so.4 seexpr-krita-4.0.4.0_1
 libKSeExpr.so.4 seexpr-krita-4.0.4.0_1
 libkritaqmicinterface.so.19 krita-5.2.0_1
 liburing.so.2 liburing-2.0_1
-libbson-1.0.so.0 libbson-1.17.4_2
+libbson2.so.2 libbson-2.1.2_1
 libsonic.so.0 libsonic-0.2.0_1
 libtickit.so.3 libtickit-0.4.1_1
 libnotcurses.so.3 notcurses-3.0.5_1
