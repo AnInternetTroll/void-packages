@@ -1,13 +1,15 @@
 # Template file for 'zizmor'
 pkgname=zizmor
-version=1.25.2
+version=1.26.1
 revision=1
 build_style=cargo
 make_install_args="--path crates/zizmor"
+# https://github.com/zizmorcore/zizmor/issues/2139
+make_check_args="-- --skip e2e::issue_1745"
 short_desc="Static analysis tool for GitHub Actions"
 maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
 license="MIT"
-homepage="https://woodruffw.github.io/zizmor/"
+homepage="https://zizmor.sh"
 changelog="https://github.com/woodruffw/zizmor/releases"
 distfiles="https://github.com/woodruffw/zizmor/archive/refs/tags/v${version}.tar.gz"
-checksum=c0e8867d7f32a9a68c62c12611c53c4d915e80adf3608c78b105c2da0bea6e30
+checksum=ec5540b3bd6d347df61dcd24ecd2eaffd3181808f4dafc59a9c889e26b075eb8
