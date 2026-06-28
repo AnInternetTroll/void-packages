@@ -1,6 +1,6 @@
 # Template file for 'gotosocial'
 pkgname=gotosocial
-version=0.21.2
+version=0.21.3
 revision=1
 build_style=go
 go_import_path="code.superseriousbusiness.org/gotosocial"
@@ -16,7 +16,7 @@ changelog="https://codeberg.org/superseriousbusiness/gotosocial/releases"
 distfiles="https://codeberg.org/superseriousbusiness/gotosocial/archive/v${version}.tar.gz"
 # distfiles="https://github.com/superseriousbusiness/gotosocial/releases/download/v$version/gotosocial-$version-source-code.tar.gz"
  # https://github.com/superseriousbusiness/gotosocial/releases/download/v$version/gotosocial_${version}_web-assets.tar.gz"
-checksum=a4fc7f0bcf7cb78c4ea814121967abf2a6b39d809e34e2fc7f95182f8654f25f
+checksum=514b36d738fbbb2b0ba40c4f166c6c05e6df42c1a9945db17b2c499a12c2966d
 system_accounts="_gotosocial"
 # TODO: These tests fail TestServeFileTestSuite/TestServeSmallRemoteFileRecache|TestManagerTestSuite/TestPngNoAlphaChannelProcess|TestManagerTestSuite/TestSimpleJpegProcess|TestManagerTestSuite/TestSimpleJpegProcessWithCallback|TestManagerTestSuite/TestSimpleJpegProcessWithDiskStorage|TestGetFileTestSuite/TestGetRemoteFileThumbnailUncached
 make_check=no
