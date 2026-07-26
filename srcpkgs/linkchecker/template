@@ -1,0 +1,22 @@
+# Template file for 'linkchecker'
+pkgname=linkchecker
+version=10.6.0
+revision=1
+build_style=python3-pep517
+make_check_args="
+ --ignore tests/checker/test_file.py
+ --ignore tests/checker/test_httpbin.py
+ --ignore tests/checker/test_httpbin.py
+ --ignore tests/checker/test_httpbin.py
+ --ignore tests/checker/test_httpbin.py"
+_depends="python3-BeautifulSoup4 python3-requests python3-dnspython python3-argcomplete python3-pdfminer.six"
+hostmakedepends="python3-wheel hatchling python3-setuptools hatch-vcs"
+checkdepends="${_depends} python3-pytest python3-openssl gettext"
+depends="${_depends}"
+short_desc="Check links in web documents or full websites"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="GPL-3.0-or-later"
+homepage="https://linkchecker.github.io/linkchecker/"
+changelog="https://github.com/linkchecker/linkchecker/releases"
+distfiles="https://github.com/linkchecker/linkchecker/archive/refs/tags/v${version}.tar.gz"
+checksum=1e6a0911d440890973e7bfaaa78daa776cfc9f25e846bc7f7724f6d60aeec6fc
