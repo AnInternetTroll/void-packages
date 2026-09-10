@@ -1,0 +1,17 @@
+# Template file for 'sonusmix'
+pkgname=sonusmix
+version=0.1.1
+revision=1
+build_style=cargo
+hostmakedepends="pkg-config"
+makedepends="graphene-devel dbus-devel pango-devel gdk-pixbuf-devel gtk4-devel pipewire-devel clang21-devel"
+depends=""
+short_desc="Next-gen Pipewire audio routing tool"
+maintainer="Luca Matei Pintilie <luca@lucamatei.com>"
+license="MPL-2.0"
+homepage="https://codeberg.org/sonusmix/sonusmix"
+changelog="https://codeberg.org/sonusmix/sonusmix/releases"
+distfiles="https://codeberg.org/sonusmix/sonusmix/archive/v${version}.tar.gz"
+checksum=6814d65d67c681c094b54cef29e31d7e14d36daebd442989f45b0034f520c36b
+# Tests fail (probably because no pipewire running)
+make_check=no
